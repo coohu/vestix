@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { View, TextInput, FlatList, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { Link } from 'expo-router';
 import { create } from 'zustand';
-import { API_BASE_URL } from '@env';
+import Config from 'react-native-config';
+
+const API_BASE_URL = Config.API_BASE_URL;
 
 const useSearchStore = create((set) => ({
   results: [],
   loading: false,
   error: null,
-  searchAssets: async (query) => {
+  searchAssets: async (query:any) => {
     if (!query) {
       set({ results: [], loading: false });
       return;
