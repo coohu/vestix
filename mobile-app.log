@@ -1,0 +1,13 @@
+
+> mobile-app@1.0.0 web
+> expo start --web
+
+Starting project at /app/mobile-app
+React Compiler enabled
+Starting Metro Bundler
+The following packages should be updated for best compatibility with the installed expo version:
+  @shopify/flash-list@2.2.0 - expected version: 2.0.2
+  @shopify/react-native-skia@2.4.7 - expected version: 2.2.12
+Your project may not work correctly until you install the expected versions of the packages.
+Waiting on http://localhost:8081
+Logs for your project will appear below.
