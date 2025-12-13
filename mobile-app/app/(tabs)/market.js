@@ -2,77 +2,45 @@ import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { FlashList } from '@shopify/flash-list';
-import { create } from 'zustand';
-import { useNavigation } from '@react-navigation/native';
-
-const API_BASE_URL = 'http://localhost:3000';
-
-// Zustand store for market data
-const useMarketStore = create((set, get) => ({
-  markets: {
-    crypto: [],
-    index: [],
-    metal: [],
-    fx: [],
-  },
-  loading: {
-    crypto: false,
-    index: false,
-    metal: false,
-    fx: false,
-  },
-  error: null,
-  fetchMarketData: async (category) => {
-    if (get().loading[category]) return;
-
-    set(state => ({ loading: { ...state.loading, [category]: true } }));
-    try {
-      const response = await fetch(`${API_BASE_URL}/markets?category=${category}`);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch ${category} data`);
-      }
-      const data = await response.json();
-      set(state => ({
-        markets: { ...state.markets, [category]: data },
-        loading: { ...state.loading, [category]: false },
-      }));
-    } catch (error) {
-      set({ error: error.message, loading: { ...get().loading, [category]: false } });
-    }
-  },
-}));
+import useAppStore from '../store';
+import SearchComponent from '../../components/SearchComponent';
+import { Ionicons } from '@expo/vector-icons';
+import { Link } from 'expo-router';
 
 // A single item in the market list
 const MarketListItem = ({ item }) => {
-    const navigation = useNavigation();
+    const { watchlistSymbols, toggleWatchlist } = useAppStore();
+    const isWatched = watchlistSymbols.some(w => w.symbol === item.symbol);
 
     return (
-        <TouchableOpacity style={styles.listItem} onPress={() => navigation.navigate('Details', { asset: item })}>
-            <View style={styles.itemLeft}>
-            <Text style={styles.itemSymbol}>{item.symbol}</Text>
-            <Text style={styles.itemName}>{item.name}</Text>
-            </View>
-            <View style={styles.itemRight}>
-            <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
-            <Text style={[styles.itemChange, item.changePercent >= 0 ? styles.positive : styles.negative]}>
-                {item.changePercent.toFixed(2)}%
-            </Text>
-            </View>
-        </TouchableOpacity>
+        <Link href={{ pathname: "/detail", params: { asset: JSON.stringify(item) } }} asChild>
+            <TouchableOpacity style={styles.listItem}>
+                <TouchableOpacity onPress={() => toggleWatchlist(item)} style={styles.watchButton}>
+                    <Ionicons name={isWatched ? "star" : "star-outline"} size={24} color={isWatched ? "gold" : "gray"} />
+                </TouchableOpacity>
+                <View style={styles.itemLeft}>
+                    <Text style={styles.itemSymbol}>{item.symbol}</Text>
+                    <Text style={styles.itemName}>{item.name}</Text>
+                </View>
+                <View style={styles.itemRight}>
+                    <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
+                    <Text style={[styles.itemChange, item.changePercent >= 0 ? styles.positive : styles.negative]}>
+                        {item.changePercent.toFixed(2)}%
+                    </Text>
+                </View>
+            </TouchableOpacity>
+        </Link>
     );
 };
 
 // A generic component to display a list for a market category
 const MarketCategoryList = ({ category }) => {
-  const { markets, loading, fetchMarketData } = useMarketStore();
+  const { markets, loading, fetchMarketData } = useAppStore();
   const data = markets[category];
 
   useEffect(() => {
-    // Fetch data only if the list is empty
-    if (data.length === 0) {
-      fetchMarketData(category);
-    }
-  }, [category, data.length, fetchMarketData]);
+    fetchMarketData(category);
+  }, [category, fetchMarketData]);
 
   if (loading[category] && data.length === 0) {
     return <ActivityIndicator size="large" style={styles.loader} />;
@@ -94,10 +62,17 @@ const MarketCategoryList = ({ category }) => {
 const Tab = createMaterialTopTabNavigator();
 
 export default function MarketScreen() {
+  const loadWatchlist = useAppStore(state => state.loadWatchlist);
+  useEffect(() => {
+    loadWatchlist();
+  }, [loadWatchlist]);
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.header}>Markets</Text>
+      <SearchComponent />
       <Tab.Navigator>
+        <Tab.Screen name="Watchlist" children={() => <MarketCategoryList category="watchlist" />} />
         <Tab.Screen name="Crypto" children={() => <MarketCategoryList category="crypto" />} />
         <Tab.Screen name="Indices" children={() => <MarketCategoryList category="index" />} />
         <Tab.Screen name="Metals" children={() => <MarketCategoryList category="metal" />} />
@@ -122,14 +97,17 @@ const styles = StyleSheet.create({
   },
   listItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
+  watchButton: {
+    marginRight: 16,
+  },
   itemLeft: {
+    flex: 1,
     flexDirection: 'column',
   },
   itemSymbol: {

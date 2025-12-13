@@ -2,7 +2,8 @@ const fastify = require('fastify')({ logger: true });
 const path = require('path');
 const fs = require('fs');
 const yaml = require('yaml');
-const { getMarketData } = require('./coingecko');
+const { getMarketData, getKlineData, getCoinList } = require('./coingecko');
+const { getGlobalIndices, getMetalsData, getFxData, searchAssets } = require('./alphavantage');
 
 
 // Register Swagger
@@ -20,14 +21,14 @@ fastify.register(require('@fastify/swagger-ui'), {
   routePrefix: '/documentation',
 })
 
-// Mock data conforming to the UnifiedTicker and UnifiedKline schemas
-const mockTicker = {
-  symbol: 'SPY',
-  name: 'S&P 500 ETF',
-  category: 'index',
-  price: 500.50,
-  change: 5.00,
-  changePercent: 1.00,
+// Mock data
+const mockFuture = {
+  symbol: 'CL',
+  name: 'Crude Oil Future',
+  category: 'future',
+  price: 80.50,
+  change: 1.25,
+  changePercent: 1.57,
   timestamp: Date.now(),
 };
 
@@ -44,25 +45,99 @@ const mockKline = {
 fastify.get('/markets', async (request, reply) => {
   const { category } = request.query;
 
-  if (category === 'crypto') {
-    const data = await getMarketData();
-    return data;
+  let data = [];
+  switch (category) {
+    case 'crypto':
+      data = await getMarketData();
+      break;
+    case 'index':
+      data = await getGlobalIndices();
+      break;
+    case 'metal':
+      data = await getMetalsData();
+      break;
+    case 'fx':
+      data = await getFxData();
+      break;
+    case 'future':
+      data = [mockFuture]; // Mock data for futures
+      break;
+    default:
+      reply.code(400).send({ error: 'Invalid or missing category' });
+      return;
   }
 
-  // Return mock data for other categories for now
-  return [mockTicker];
+  return data;
 });
 
 fastify.get('/ticker', async (request, reply) => {
-  return mockTicker;
+    const { symbol, category } = request.query;
+    if (!symbol) {
+        reply.code(400).send({ error: 'Missing required query parameter: symbol' });
+        return;
+    }
+
+    // This is a simplified implementation. A real app would have a more robust
+    // way to look up tickers from different sources.
+    const allMarkets = await Promise.all([
+        getMarketData(),
+        getGlobalIndices(),
+        getMetalsData(),
+        getFxData(),
+        [mockFuture],
+    ]).then(results => results.flat());
+
+    const ticker = allMarkets.find(t => t.symbol.toUpperCase() === symbol.toUpperCase());
+
+    if (ticker) {
+        return ticker;
+    } else {
+        reply.code(404).send({ error: `Ticker ${symbol} not found` });
+    }
 });
 
 fastify.get('/kline', async (request, reply) => {
-  return [mockKline];
+    const { symbol, interval, category } = request.query;
+
+    if (!symbol || !interval) {
+        reply.code(400).send({ error: 'Missing required query parameters: symbol, interval' });
+        return;
+    }
+
+    if (category === 'crypto') {
+        const coinList = await getCoinList();
+        if (!coinList) {
+            reply.code(500).send({ error: 'Could not fetch coin list' });
+            return;
+        }
+        const coinId = coinList.get(symbol.toUpperCase());
+
+        if (coinId) {
+            const days = interval.includes('d') ? '365' : interval.includes('h') ? '30' : '1';
+            const data = await getKlineData(coinId, days);
+            if (data) {
+                return data;
+            } else {
+                reply.code(404).send({ error: `Kline data not found for symbol ${symbol}` });
+                return;
+            }
+        } else {
+            reply.code(404).send({ error: `Symbol ${symbol} not found` });
+            return;
+        }
+    }
+
+    return [mockKline];
 });
 
 fastify.get('/search', async (request, reply) => {
-  return [mockTicker];
+    const { query } = request.query;
+    if (!query) {
+        reply.code(400).send({ error: 'Missing required query parameter: query' });
+        return;
+    }
+    const data = await searchAssets(query);
+    return data;
 });
 
 // Start the server
