@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ActivityIndicator, Dimensions } from 'react-native';
-import { Canvas, Path, Skia, Paint } from '@shopify/react-native-skia';
+import { Canvas, Path, Skia } from '@shopify/react-native-skia';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
-import Animated, { useSharedValue, useAnimatedStyle, useDerivedValue, runOnJS } from 'react-native-reanimated';
+import { useSharedValue,  runOnJS } from 'react-native-reanimated';
 import { useLocalSearchParams } from 'expo-router';
 import { API_BASE_URL } from '@env';
 

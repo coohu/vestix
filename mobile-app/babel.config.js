@@ -7,7 +7,13 @@ module.exports = function (api) {
       ["module:react-native-dotenv", {
         "moduleName": "@env",
         "path": ".env",
-      }]
+      }],
+      [
+        '@babel/plugin-transform-react-jsx',
+        {
+          runtime: 'automatic',
+        },
+      ],
     ],
   };
 };

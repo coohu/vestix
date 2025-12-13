@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_BASE_URL } from '@env';
+import Config from 'react-native-config';
+
+const API_BASE_URL = Config.API_BASE_URL;
 
 const useAppStore = create((set, get) => ({
   markets: {
@@ -31,7 +33,7 @@ const useAppStore = create((set, get) => ({
     }
   },
 
-  toggleWatchlist: async (asset) => {
+  toggleWatchlist: async (asset:any) => {
     const { watchlistSymbols } = get();
     const isWatched = watchlistSymbols.some(item => item.symbol === asset.symbol);
     let newSymbols;
@@ -44,7 +46,7 @@ const useAppStore = create((set, get) => ({
     await AsyncStorage.setItem('watchlist', JSON.stringify(newSymbols));
   },
 
-  fetchMarketData: async (category) => {
+      fetchMarketData: async (category:any) => {
     if (get().loading[category]) return;
 
     set(state => ({ loading: { ...state.loading, [category]: true } }));

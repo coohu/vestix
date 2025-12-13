@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { FlashList } from '@shopify/flash-list';
@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 
 // A single item in the market list
-const MarketListItem = ({ item }) => {
+const MarketListItem = ({ item }:any) => {
     const { watchlistSymbols, toggleWatchlist } = useAppStore();
     const isWatched = watchlistSymbols.some(w => w.symbol === item.symbol);
 
