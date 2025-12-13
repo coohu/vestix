@@ -7,12 +7,6 @@ const BASE_URL = 'https://www.alphavantage.co/query';
 const cache = new Map();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-/**
- * A generic function to fetch data from Alpha Vantage with caching.
- * @param {string} cacheKey The key for caching the result.
- * @param {object} params The parameters for the Alpha Vantage API call.
- * @returns {Promise<any>} The data from the API.
- */
 async function fetchData(cacheKey, params) {
   const cached = cache.get(cacheKey);
   if (cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
@@ -44,13 +38,6 @@ async function fetchData(cacheKey, params) {
   }
 }
 
-/**
- * Transforms the Global Quote data from Alpha Vantage to the UnifiedTicker format.
- * @param {object} quote The Global Quote object from the API response.
- * @param {string} name The display name for the ticker.
- * @param {'index' | 'metal' | 'fx'} category The category of the asset.
- * @returns {object|null} A UnifiedTicker object or null if input is invalid.
- */
 function transformGlobalQuote(quote, name, category) {
   if (!quote || !quote['01. symbol']) return null;
   return {
@@ -64,14 +51,6 @@ function transformGlobalQuote(quote, name, category) {
   };
 }
 
-/**
- * Transforms the daily FX/Crypto data to calculate change and format as UnifiedTicker.
- * @param {object} dailyData The "Time Series FX (Daily)" object.
- * @param {string} symbol The symbol for the ticker.
- * @param {string} name The display name for the ticker.
- * @param {'fx' | 'metal'} category The category of the asset.
- * @returns {object|null} A UnifiedTicker object or null if input is invalid.
- */
 function transformFxDaily(dailyData, symbol, name, category) {
     if (!dailyData) return null;
     const dates = Object.keys(dailyData).sort((a, b) => new Date(b) - new Date(a));
@@ -97,21 +76,27 @@ function transformFxDaily(dailyData, symbol, name, category) {
 }
 
 async function getGlobalIndices() {
-  const symbols = [
-    { symbol: 'SPY', name: 'S&P 500' },
-    { symbol: 'QQQ', name: 'NASDAQ 100' },
-    { symbol: 'DAX', name: 'DAX' },
-    { symbol: '^N225', name: 'Nikkei 225' },
-    { symbol: '000300.SS', name: 'CSI 300' },
-  ];
+    const symbols = [
+        { symbol: 'SPY', name: 'S&P 500' },
+        { symbol: 'QQQ', name: 'NASDAQ 100' },
+        { symbol: 'XIU.TRT', name: 'TSX 60' },
+        { symbol: '^N225', name: 'Nikkei 225' },
+        { symbol: '000300.SS', name: 'CSI 300' },
+    ];
 
-  const promises = symbols.map(s =>
-    fetchData(`index-${s.symbol}`, { function: 'GLOBAL_QUOTE', symbol: s.symbol })
-      .then(data => transformGlobalQuote(data['Global Quote'], s.name, 'index'))
-  );
+    const results = [];
+    for (const s of symbols) {
+        const data = await fetchData(`index-${s.symbol}`, { function: 'GLOBAL_QUOTE', symbol: s.symbol });
+        if (data && data['Global Quote']) {
+            const transformed = transformGlobalQuote(data['Global Quote'], s.name, 'index');
+            if (transformed) {
+                results.push(transformed);
+            }
+        }
+        await new Promise(resolve => setTimeout(resolve, 15000));
+    }
 
-  const results = await Promise.all(promises);
-  return results.filter(r => r !== null);
+    return results;
 }
 
 async function getMetalsData() {
@@ -120,13 +105,19 @@ async function getMetalsData() {
         { from: 'XAG', to: 'USD', name: 'Silver' },
     ];
 
-    const promises = metals.map(m =>
-        fetchData(`metal-${m.from}`, { function: 'FX_DAILY', from_symbol: m.from, to_symbol: m.to })
-            .then(data => transformFxDaily(data['Time Series FX (Daily)'], `${m.from}/${m.to}`, m.name, 'metal'))
-    );
+    const results = [];
+    for (const m of metals) {
+        const data = await fetchData(`metal-${m.from}`, { function: 'FX_DAILY', from_symbol: m.from, to_symbol: m.to });
+        if (data && data['Time Series FX (Daily)']) {
+            const transformed = transformFxDaily(data['Time Series FX (Daily)'], `${m.from}/${m.to}`, m.name, 'metal');
+            if (transformed) {
+                results.push(transformed);
+            }
+        }
+        await new Promise(resolve => setTimeout(resolve, 15000));
+    }
 
-    const results = await Promise.all(promises);
-    return results.filter(r => r !== null);
+    return results;
 }
 
 async function getFxData() {
@@ -136,17 +127,51 @@ async function getFxData() {
         { from: 'USD', to: 'CNY', name: 'USD/CNY' },
     ];
 
-    const promises = pairs.map(p =>
-        fetchData(`fx-${p.from}${p.to}`, { function: 'FX_DAILY', from_symbol: p.from, to_symbol: p.to })
-            .then(data => transformFxDaily(data['Time Series FX (Daily)'], `${p.from}/${p.to}`, p.name, 'fx'))
-    );
+    const results = [];
+    for (const p of pairs) {
+        const data = await fetchData(`fx-${p.from}${p.to}`, { function: 'FX_DAILY', from_symbol: p.from, to_symbol: p.to });
+        if (data && data['Time Series FX (Daily)']) {
+            const transformed = transformFxDaily(data['Time Series FX (Daily)'], `${p.from}/${p.to}`, p.name, 'fx');
+            if (transformed) {
+                results.push(transformed);
+            }
+        }
+        await new Promise(resolve => setTimeout(resolve, 15000));
+    }
 
-    const results = await Promise.all(promises);
-    return results.filter(r => r !== null);
+    return results;
 }
+
+async function searchAssets(keywords) {
+    const cacheKey = `search-${keywords}`;
+    const cached = cache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
+        return cached.data;
+    }
+
+    const data = await fetchData(cacheKey, { function: 'SYMBOL_SEARCH', keywords });
+
+    if (data && data.bestMatches) {
+        const unifiedData = data.bestMatches.map(m => ({
+            symbol: m['1. symbol'],
+            name: m['2. name'],
+            category: 'search',
+            price: 0,
+            change: 0,
+            changePercent: 0,
+            timestamp: Date.now(),
+        }));
+        cache.set(cacheKey, { timestamp: Date.now(), data: unifiedData });
+        return unifiedData;
+    }
+
+    return [];
+}
+
 
 module.exports = {
   getGlobalIndices,
   getMetalsData,
   getFxData,
+  searchAssets,
 };
