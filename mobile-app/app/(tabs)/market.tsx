@@ -5,6 +5,7 @@ import SearchComponent from '../../components/SearchComponent';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlashList } from '@shopify/flash-list';
 import { Ionicons } from '@expo/vector-icons';
+import { Platform } from 'react-native';
 import { Link } from 'expo-router';
 import { useEffect } from 'react';
 
@@ -13,7 +14,7 @@ const MarketListItem = ({ item }:any) => {
   const isWatched = watchlistSymbols.some(w => w.symbol === item.symbol);
 
   return (
-  <Link href={{ pathname: "/detail", params: { asset: JSON.stringify(item) } }} asChild>
+  <Link href={{ pathname: Platform.OS === 'web'? "/detail.web":"/detail", params: { asset: JSON.stringify(item) } }} asChild>
     <TouchableOpacity style={styles.listItem}>
       <TouchableOpacity onPress={() => toggleWatchlist(item)} style={styles.watchButton}>
         <Ionicons name={isWatched ? "star" : "star-outline"} size={24} color={isWatched ? "gold" : "gray"} />

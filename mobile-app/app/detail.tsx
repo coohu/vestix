@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ActivityIndicator, Dimensions } from 'react-nat
 import { Canvas, Path, Skia } from '@shopify/react-native-skia';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSharedValue } from 'react-native-reanimated';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import { runOnJS } from 'react-native-reanimated';
 import Constants from 'expo-constants';
@@ -29,11 +29,11 @@ export default function DetailScreen() {
   useEffect(() => {
     const fetchKlineData = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/kline?symbol=${asset.symbol}&interval=1d&category=${asset.category}`);
-        if (!response.ok) throw new Error('Failed to fetch kline data');
-        const data = await response.json();
+        const res = await fetch(`${API_BASE_URL}/kline?symbol=${asset.symbol}&interval=1d&category=${asset.category}`);
+        if (!res.ok) throw new Error('Failed to fetch kline data');
+        const data = await res.json();
         setKlineData(data);
-      } catch (e) {
+      } catch (e:any) {
         setError(e.message);
       } finally {
         setLoading(false);
@@ -42,7 +42,7 @@ export default function DetailScreen() {
     fetchKlineData();
   }, [asset]);
 
-  const candles = React.useMemo(() => {
+  const candles = useMemo(() => {
     if (klineData.length === 0) return [];
 
     const visibleCandles = Math.floor(klineData.length / scale.value);

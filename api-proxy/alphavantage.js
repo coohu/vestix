@@ -165,10 +165,59 @@ async function marketStatus() {
     return cached.data;
   }
   const data = await fetchData(cacheKey, { function: 'MARKET_STATUS' })
-  if (data && data.markets && data.markets.length > 0) {
+  if (Array.isArray(data?.markets) && data.markets?.length > 0) {
     cache.set(cacheKey, { timestamp: Date.now(), data: data.markets });
     return data.markets;
   }
   return [];
 }
-module.exports = { getGlobalIndices, getMetalsData, getFxData, searchAssets, marketStatus };
+
+async function getKlineData(symbol, interval = '1d') {
+  const cacheKey = `kline-${symbol}-${interval}`;
+  const cached = cache.get(cacheKey);
+  if (cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
+    return cached.data;
+  }
+  const functionMap = {
+    '1min': 'TIME_SERIES_INTRADAY',
+    '5min': 'TIME_SERIES_INTRADAY',
+    '15min': 'TIME_SERIES_INTRADAY',
+    '30min': 'TIME_SERIES_INTRADAY',
+    '60min': 'TIME_SERIES_INTRADAY',
+    '1d': 'TIME_SERIES_DAILY',
+    '1wk': 'TIME_SERIES_WEEKLY',
+    '1mo': 'TIME_SERIES_MONTHLY',
+  };
+  const func = functionMap[interval] || 'TIME_SERIES_DAILY'
+  const params = {
+    function: func, symbol: symbol,
+    ...(func === 'TIME_SERIES_INTRADAY' && { interval: interval })
+  };
+  const data = await fetchData(cacheKey, params);
+  let timeSeriesKey = null;
+  if (data) {
+    for (const key of Object.keys(data)) {
+      if (key.includes('Time Series')) {
+        timeSeriesKey = key;
+        break;
+      }
+    }
+  }
+  if (data && timeSeriesKey && data[timeSeriesKey]) {
+    const series = data[timeSeriesKey];
+    const unifiedData = Object.keys(series).map(timestamp => ({
+      time: new Date(timestamp).getTime(),
+      open: parseFloat(series[timestamp]['1. open']),
+      high: parseFloat(series[timestamp]['2. high']),
+      low: parseFloat(series[timestamp]['3. low']),
+      close: parseFloat(series[timestamp]['4. close']),
+      volume: parseInt(series[timestamp]['5. volume'] || '0', 10),
+    })).sort((a, b) => a.time - b.time);
+
+    cache.set(cacheKey, { timestamp: Date.now(), data: unifiedData });
+    return unifiedData;
+  }
+  return [];
+}
+
+module.exports = { getGlobalIndices, getMetalsData, getFxData, searchAssets, marketStatus, getKlineData };

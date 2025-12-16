@@ -4,7 +4,7 @@ import Constants from 'expo-constants';
 const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL ??
   process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://100.64.0.1:3000'
 
-export type MarketCategory = 'crypto' | 'index' | 'metal' | 'fx' | 'watchlist' | 'status';
+export type MarketCategory = 'crypto' | 'index' | 'metal' | 'fx' | 'watchlist' | 'status' | 'future' | 'stock';
 
 export interface Asset {
   symbol: string;

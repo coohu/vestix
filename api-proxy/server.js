@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const yaml = require('yaml');
 const { getMarketData, getKlineData, getCoinList } = require('./coingecko');
-const { getGlobalIndices, getMetalsData, getFxData, searchAssets, marketStatus } = require('./alphavantage');
+const { getGlobalIndices, getMetalsData, getFxData, searchAssets, marketStatus, getKlineData :kline } = require('./alphavantage');
 
 const swaggerFile = fs.readFileSync(path.join(__dirname, 'openapi.yaml'), 'utf8')
 const swaggerDocument = yaml.parse(swaggerFile)
@@ -79,13 +79,13 @@ fastify.get('/ticker', async (request, reply) => {
 
 fastify.get('/kline', async (request, reply) => {
   const { symbol, interval, category } = request.query;
-  console.log(`Received /kline request with symbol=${symbol}, interval=${interval}, category=${category}`);
   if (!symbol || !interval) {
     reply.code(400).send({ error: 'Missing required query parameters: symbol, interval' });
     return;
   }
-
+  
   if (category === 'crypto') {
+    console.log(`-------------- symbol=${symbol}, interval=${interval}, category=${category}`);
     const coinList = await getCoinList();
     if (!coinList) {
       reply.code(500).send({ error: 'Could not fetch coin list' });
@@ -105,6 +105,17 @@ fastify.get('/kline', async (request, reply) => {
       reply.code(404).send({ error: `Symbol ${symbol} not found` });
       return;
     }
+  }else if (category === 'future') {
+
+  }else if (category === 'index' || category === 'stock') {
+    return await kline(symbol, interval);
+  }else if (category === 'metal') {
+
+  }else if (category === 'fx') {
+
+  }else {
+    reply.code(400).send({ error: 'Invalid or missing category' });
+    return;
   }
   return [ mockKline ];
 });
