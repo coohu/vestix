@@ -1,61 +1,55 @@
-import { useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { FlashList } from '@shopify/flash-list';
-import useAppStore from '../store';
+import useAppStore, { MarketCategory } from '../../hooks/use-app-store';
 import SearchComponent from '../../components/SearchComponent';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { FlashList } from '@shopify/flash-list';
 import { Ionicons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
+import { useEffect } from 'react';
 
-// A single item in the market list
 const MarketListItem = ({ item }:any) => {
-    const { watchlistSymbols, toggleWatchlist } = useAppStore();
-    const isWatched = watchlistSymbols.some(w => w.symbol === item.symbol);
+  const { watchlistSymbols, toggleWatchlist } = useAppStore();
+  const isWatched = watchlistSymbols.some(w => w.symbol === item.symbol);
 
-    return (
-        <Link href={{ pathname: "/detail", params: { asset: JSON.stringify(item) } }} asChild>
-            <TouchableOpacity style={styles.listItem}>
-                <TouchableOpacity onPress={() => toggleWatchlist(item)} style={styles.watchButton}>
-                    <Ionicons name={isWatched ? "star" : "star-outline"} size={24} color={isWatched ? "gold" : "gray"} />
-                </TouchableOpacity>
-                <View style={styles.itemLeft}>
-                    <Text style={styles.itemSymbol}>{item.symbol}</Text>
-                    <Text style={styles.itemName}>{item.name}</Text>
-                </View>
-                <View style={styles.itemRight}>
-                    <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
-                    <Text style={[styles.itemChange, item.changePercent >= 0 ? styles.positive : styles.negative]}>
-                        {item.changePercent.toFixed(2)}%
-                    </Text>
-                </View>
-            </TouchableOpacity>
-        </Link>
-    );
+  return (
+  <Link href={{ pathname: "/detail", params: { asset: JSON.stringify(item) } }} asChild>
+    <TouchableOpacity style={styles.listItem}>
+      <TouchableOpacity onPress={() => toggleWatchlist(item)} style={styles.watchButton}>
+        <Ionicons name={isWatched ? "star" : "star-outline"} size={24} color={isWatched ? "gold" : "gray"} />
+      </TouchableOpacity>
+      <View style={styles.itemLeft}>
+        <Text style={styles.itemSymbol}>{item.symbol}</Text>
+        <Text style={styles.itemName}>{item.name}</Text>
+      </View>
+      <View style={styles.itemRight}>
+        <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
+        <Text style={[styles.itemChange, item.changePercent >= 0 ? styles.positive : styles.negative]}>
+          {item.changePercent.toFixed(2)}%
+        </Text>
+      </View>
+    </TouchableOpacity>
+  </Link>);
 };
 
 // A generic component to display a list for a market category
-const MarketCategoryList = ({ category }) => {
+const MarketCategoryList = ({ category }:{category: MarketCategory}) => {
   const { markets, loading, fetchMarketData } = useAppStore();
   const data = markets[category];
 
-  useEffect(() => {
-    fetchMarketData(category);
-  }, [category, fetchMarketData]);
+  useEffect(() => { fetchMarketData(category)  }, [category, fetchMarketData]);
 
   if (loading[category] && data.length === 0) {
     return <ActivityIndicator size="large" style={styles.loader} />;
   }
 
   return (
-    <FlashList
-      data={data}
-      renderItem={({ item }) => <MarketListItem item={item} />}
-      keyExtractor={item => item.symbol}
-      estimatedItemSize={60}
-      onRefresh={() => fetchMarketData(category)}
-      refreshing={loading[category]}
-    />
-  );
+  <FlashList data={data}
+    renderItem={({ item }) => <MarketListItem item={item} />}
+    keyExtractor={item => item.symbol}
+    onRefresh={() => fetchMarketData(category)}
+    refreshing={loading[category]}
+  />);
 };
 
 
@@ -63,9 +57,7 @@ const Tab = createMaterialTopTabNavigator();
 
 export default function MarketScreen() {
   const loadWatchlist = useAppStore(state => state.loadWatchlist);
-  useEffect(() => {
-    loadWatchlist();
-  }, [loadWatchlist]);
+  useEffect(() => { loadWatchlist() }, [loadWatchlist]);
 
   return (
     <SafeAreaView style={styles.container}>

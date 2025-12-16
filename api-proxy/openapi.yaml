@@ -14,7 +14,7 @@ paths:
           required: true
           schema:
             type: string
-            enum: [index, metal, fx, crypto, future]
+            enum: [index, metal, fx, crypto, future, status]
       responses:
         '200':
           description: A list of tickers for the specified category

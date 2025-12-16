@@ -1,18 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ActivityIndicator, Dimensions } from 'react-native';
-import { Canvas, Path, Skia } from '@shopify/react-native-skia';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
+import { View, Text, StyleSheet, ActivityIndicator, Dimensions } from 'react-native';
 import { useSharedValue,  runOnJS } from 'react-native-reanimated';
+import { Canvas, Path, Skia } from '@shopify/react-native-skia';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useEffect, useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
-import { API_BASE_URL } from '@env';
+import Constants from 'expo-constants';
+
+const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL ??
+  process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://127.0.0.1:3000'
 
 const { width: screenWidth } = Dimensions.get('window');
 const CHART_HEIGHT = 300;
 const CHART_WIDTH = screenWidth - 32;
-
 export default function DetailScreen() {
   const { asset: assetString } = useLocalSearchParams();
-  const asset = JSON.parse(assetString);
+  const asset = JSON.parse(assetString.toString());
 
   const [klineData, setKlineData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -85,55 +88,52 @@ export default function DetailScreen() {
   const composedGesture = Gesture.Race(panGesture, pinchGesture, longPressGesture);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-        <SafeAreaView style={styles.container}>
-            <Text style={styles.header}>{asset.name} ({asset.symbol})</Text>
-
-            {loading && <ActivityIndicator size="large" style={styles.loader} />}
-            {error && <Text style={styles.error}>{error}</Text>}
-
-            {!loading && !error && (
-                <GestureDetector gesture={composedGesture}>
-                    <View style={styles.chartContainer}>
-                        <Canvas style={{ width: CHART_WIDTH, height: CHART_HEIGHT }}>
-                            {candles.map((candle, index) => (
-                                <React.Fragment key={index}>
-                                    <Path path={candle.wickPath} strokeWidth={1} color={candle.color} />
-                                    <Path path={candle.bodyPath} color={candle.color} />
-                                </React.Fragment>
-                            ))}
-                            {crosshair && <Path path={Skia.Path.Make().moveTo(0, crosshair.y).lineTo(CHART_WIDTH, crosshair.y)} color="grey" strokeWidth={1} />}
-                            {crosshair && <Path path={Skia.Path.Make().moveTo(crosshair.x, 0).lineTo(crosshair.x, CHART_HEIGHT)} color="grey" strokeWidth={1} />}
-                        </Canvas>
-                    </View>
-                </GestureDetector>
-            )}
-        </SafeAreaView>
-    </GestureHandlerRootView>
-  );
+  <GestureHandlerRootView style={{ flex: 1 }}>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.header}>{asset.name} ({asset.symbol})</Text>
+      {loading && <ActivityIndicator size="large" style={styles.loader} />}
+      {error && <Text style={styles.error}>{error}</Text>}
+      {!loading && !error && (
+        <GestureDetector gesture={composedGesture}>
+          <View style={styles.chartContainer}>
+            <Canvas style={{ width: CHART_WIDTH, height: CHART_HEIGHT }}>
+              {candles.map((candle, index) => (
+                <React.Fragment key={index}>
+                  <Path path={candle.wickPath} strokeWidth={1} color={candle.color} />
+                  <Path path={candle.bodyPath} color={candle.color} />
+                </React.Fragment>
+              ))}
+              {crosshair && <Path path={Skia.Path.Make().moveTo(0, crosshair.y).lineTo(CHART_WIDTH, crosshair.y)} color="grey" strokeWidth={1} />}
+              {crosshair && <Path path={Skia.Path.Make().moveTo(crosshair.x, 0).lineTo(crosshair.x, CHART_HEIGHT)} color="grey" strokeWidth={1} />}
+            </Canvas>
+          </View>
+        </GestureDetector>
+      )}
+    </SafeAreaView>
+  </GestureHandlerRootView>);
 }
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: '#fff',
-    },
-    header: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      padding: 16,
-      textAlign: 'center',
-    },
-    loader: {
-      marginTop: 20,
-    },
-    error: {
-      marginTop: 20,
-      textAlign: 'center',
-      color: 'red',
-    },
-    chartContainer: {
-      alignItems: 'center',
-      marginTop: 20,
-    },
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    padding: 16,
+    textAlign: 'center',
+  },
+  loader: {
+    marginTop: 20,
+  },
+  error: {
+    marginTop: 20,
+    textAlign: 'center',
+    color: 'red',
+  },
+  chartContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+  },
 });

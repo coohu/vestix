@@ -1,14 +1,26 @@
-import { StyleSheet, Text, View } from "react-native";
+import { useEffect } from "react";
+import useAppStore from "@/hooks/use-app-store";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
-export default function HelloWorld() {
+export default function Index() {
+  const { markets, loading, fetchMarketData } = useAppStore();
+  useEffect(() => { fetchMarketData('status')  }, [fetchMarketData]);
+  
   return (
-    <View style={styles.container}>
-      <View style={styles.main}>
-        <Text style={styles.title}>Hello World</Text>
-        <Text style={styles.subtitle}>the first your app.</Text>
-      </View>
-    </View>
-  );
+  <View style={styles.container}>
+    {loading.status ? <ActivityIndicator size="large" /> : <>
+      {markets.status.map((status, index) =>
+        <View style={styles.main} key={index}>
+          <Text style={styles.title}>{status.region}</Text>
+          <Text style={styles.title}>{status.current_status}</Text>
+          <Text style={styles.title}>{status.primary_exchanges}</Text>
+          <Text style={styles.title}>{status.local_open}</Text>
+          <Text style={styles.title}>{status.local_close}</Text>
+          <Text style={styles.subtitle}>{status.notes}</Text>
+        </View>
+      )}
+    </>}
+  </View>);
 }
 
 const styles = StyleSheet.create({
