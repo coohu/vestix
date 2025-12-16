@@ -23,9 +23,9 @@ const MarketListItem = ({ item }:any) => {
         <Text style={styles.itemName}>{item.name}</Text>
       </View>
       <View style={styles.itemRight}>
-        <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
+        <Text style={styles.itemPrice}>${item.price?.toFixed(2)}</Text>
         <Text style={[styles.itemChange, item.changePercent >= 0 ? styles.positive : styles.negative]}>
-          {item.changePercent.toFixed(2)}%
+          {item.changePercent?.toFixed(2)}%
         </Text>
       </View>
     </TouchableOpacity>
@@ -61,7 +61,6 @@ export default function MarketScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>Markets</Text>
       <SearchComponent />
       <Tab.Navigator>
         <Tab.Screen name="Watchlist" children={() => <MarketCategoryList category="watchlist" />} />

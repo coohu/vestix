@@ -44,13 +44,13 @@ const useSearchStore = create<SearchStore>()((set, get) => ({
     set({ loading: true, error: null });
     
     try {
-      const response = await fetch(`${API_BASE_URL}/search?query=${trimmedQuery}`);
+      const res = await fetch(`${API_BASE_URL}/search?query=${trimmedQuery}`);
       
-      if (!response.ok) {
+      if (!res.ok) {
         throw new Error('Failed to fetch search results');
       }
       
-      const data: SearchAsset[] = await response.json();
+      const data: SearchAsset[] = await res.json();
       set({ results: data, loading: false });
       
     } catch (e) {

@@ -10,20 +10,11 @@ async function fetchData( cacheKey, params ) {
     return cached.data;
   }
   try {
-    // const urlParams = new URLSearchParams({apikey: 'JO90E8HQ3QGVRJ98', ...params});
-    // const finalUrl = `${BASE_URL}?${urlParams.toString()}`;
-    // console.log('生成的 GET 请求 URL:', finalUrl);
-    // const res = await axios.get(BASE_URL, {
-    //   params: {
-    //     apikey: 'JO90E8HQ3QGVRJ98', function: 'MARKET_STATUS'
-    //   },
-    //   // proxy: {
-    //   //   host: 'http://127.0.0.1', port: 1080               
-    //   // },
-    //   timeout: 30000
-    // });
+    const res = await axios.get(BASE_URL, {
+      params: {apikey:process.env.API_KEY || 'JO90E8HQ3QGVRJ98', ...params},
+      timeout: 30000
+    });
 
-    const res = await axios.get('https://www.alphavantage.co/query?apikey=JO90E8HQ3QGVRJ98&function=MARKET_STATUS');
     if (res.data['Note']) {
       console.warn('Alpha Vantage API rate limit likely reached:', res.data['Note']);
       return null;
@@ -33,6 +24,7 @@ async function fetchData( cacheKey, params ) {
       return null;
     }
     cache.set(cacheKey, { timestamp: Date.now(), data: res.data });
+    console.log()
     return res.data;
   } catch (error) {
     console.error(`Error fetching ${cacheKey} from Alpha Vantage:`, error.message);
@@ -174,9 +166,8 @@ async function marketStatus() {
   }
   const data = await fetchData(cacheKey, { function: 'MARKET_STATUS' })
   if (data && data.markets && data.markets.length > 0) {
-    const markets = {...data.markets, timestamp: Date.now()}
-    cache.set(cacheKey, { timestamp: Date.now(), data: markets });
-    return markets;
+    cache.set(cacheKey, { timestamp: Date.now(), data: data.markets });
+    return data.markets;
   }
   return [];
 }

@@ -3,7 +3,6 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { StatusBar } from 'expo-status-bar';
 import { Stack } from 'expo-router';
-import 'react-native-reanimated';
 
 export const unstable_settings = {
   initialRouteName: '(tabs)',

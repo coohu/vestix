@@ -5,19 +5,21 @@ import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 export default function Index() {
   const { markets, loading, fetchMarketData } = useAppStore();
   useEffect(() => { fetchMarketData('status')  }, [fetchMarketData]);
-  
   return (
   <View style={styles.container}>
     {loading.status ? <ActivityIndicator size="large" /> : <>
-      {markets.status.map((status, index) =>
+      {markets.status?.map((status:any, index:number) =>
+      <View style={styles.col} key={index}>
         <View style={styles.main} key={index}>
           <Text style={styles.title}>{status.region}</Text>
-          <Text style={styles.title}>{status.current_status}</Text>
-          <Text style={styles.title}>{status.primary_exchanges}</Text>
-          <Text style={styles.title}>{status.local_open}</Text>
-          <Text style={styles.title}>{status.local_close}</Text>
-          <Text style={styles.subtitle}>{status.notes}</Text>
+          <Text style={status.current_status === "open" ? styles.open : styles.subtitle}>
+            {status.current_status}
+          </Text>
+          <Text style={styles.subtitle}>({status.local_open} - {status.local_close})</Text>
+          <Text style={styles.subtitle}>{status.primary_exchanges}</Text>
         </View>
+        <Text style={styles.subtitle}>{status.notes}</Text>
+      </View>
       )}
     </>}
   </View>);
@@ -26,21 +28,35 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    padding: 24,
+    alignItems: "baseline",
+    padding: 20,
+    gap:10,
+  },
+  col:{
+    flex: 1,
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "flex-start",
+    marginBottom: 16,
+    gap:5,
   },
   main: {
     flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
     justifyContent: "center",
-    maxWidth: 960,
-    marginHorizontal: "auto",
+    gap:8,
   },
   title: {
-    fontSize: 64,
+    fontSize: 12,
     fontWeight: "bold",
   },
   subtitle: {
-    fontSize: 36,
-    color: "#38434D",
+    fontSize: 12,
+    color: "#54575aff",
+  },
+  open: {
+    fontSize: 12,
+    color: "#32b037ff",
   },
 });

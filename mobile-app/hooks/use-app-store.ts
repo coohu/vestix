@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL ??
-  process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://127.0.0.1:3000'
+  process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://100.64.0.1:3000'
 
 export type MarketCategory = 'crypto' | 'index' | 'metal' | 'fx' | 'watchlist' | 'status';
 
@@ -11,7 +11,7 @@ export interface Asset {
   category: MarketCategory;
   name?: string;
   price?: number;
-  changePercent?: number; 
+  changePercent?: number;
   [key: string]: any;
 }
 
@@ -31,7 +31,7 @@ export interface WatchlistItem {
 }
 
 interface AppStore {
-  markets: Record<MarketCategory, Asset[] > ;
+  markets: Record<MarketCategory, Asset[]> ;
   loading: Record<MarketCategory, boolean>;
   watchlistSymbols: WatchlistItem[];
   error: string | null;
@@ -47,7 +47,7 @@ const useAppStore = create<AppStore>((set, get) => ({
     metal: [],
     fx: [],
     watchlist: [],
-    status:[],
+    status: [],
   },
   loading: {
     crypto: false,
@@ -110,11 +110,12 @@ const useAppStore = create<AppStore>((set, get) => ({
         }));
         return;
       }
+      console.log(`Fetching data for category: ${API_BASE_URL}/markets?category=${category}`);
       const res = await fetch(`${API_BASE_URL}/markets?category=${category}`);
       if (!res.ok) {
         throw new Error(`Failed to fetch ${category} data`);
       }
-      const data: Asset[] = await res.json();
+      const data: Asset = await res.json();
       set((state) => ({
         markets: { ...state.markets, [category]: data },
         loading: { ...state.loading, [category]: false },

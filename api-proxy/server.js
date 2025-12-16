@@ -5,7 +5,6 @@ const yaml = require('yaml');
 const { getMarketData, getKlineData, getCoinList } = require('./coingecko');
 const { getGlobalIndices, getMetalsData, getFxData, searchAssets, marketStatus } = require('./alphavantage');
 
-// Register Swagger
 const swaggerFile = fs.readFileSync(path.join(__dirname, 'openapi.yaml'), 'utf8')
 const swaggerDocument = yaml.parse(swaggerFile)
 fastify.register(require('@fastify/swagger'), {
@@ -13,8 +12,7 @@ fastify.register(require('@fastify/swagger'), {
 })
 
 fastify.register(require('@fastify/swagger-ui'), { routePrefix: '/documentation' })
-
-// Mock data
+fastify.register(require("@fastify/cors"), { origin: true });
 const mockFuture = {
   symbol: 'CL',
   name: 'Crude Oil Future',
@@ -81,6 +79,7 @@ fastify.get('/ticker', async (request, reply) => {
 
 fastify.get('/kline', async (request, reply) => {
   const { symbol, interval, category } = request.query;
+  console.log(`Received /kline request with symbol=${symbol}, interval=${interval}, category=${category}`);
   if (!symbol || !interval) {
     reply.code(400).send({ error: 'Missing required query parameters: symbol, interval' });
     return;
@@ -123,10 +122,10 @@ fastify.get('/search', async (request, reply) => {
 const start = async () => {
   try {
     const port = process.env.PORT || 3000;
-    await fastify.listen({ port: port, host: '0.0.0.0' });
-    fastify.log.info(`server listening on ${fastify.server.address().port}`);
+    fastify.listen({ port: port, host: '0.0.0.0' });
+    // fastify.log.info(`server listening on ${fastify.server.address().port}`);
   } catch (err) {
-    // fastify.log.error(err);
+    fastify.log.error(err);
     process.exit(1);
   }
 };
