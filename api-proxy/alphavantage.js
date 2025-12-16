@@ -10,11 +10,20 @@ async function fetchData( cacheKey, params ) {
     return cached.data;
   }
   try {
-    const res = await axios.get(BASE_URL, {
-      params: {
-        apikey: process.env.ALPHAVANTAGE_API_KEY, ...params
-      }
-    });
+    // const urlParams = new URLSearchParams({apikey: 'JO90E8HQ3QGVRJ98', ...params});
+    // const finalUrl = `${BASE_URL}?${urlParams.toString()}`;
+    // console.log('生成的 GET 请求 URL:', finalUrl);
+    // const res = await axios.get(BASE_URL, {
+    //   params: {
+    //     apikey: 'JO90E8HQ3QGVRJ98', function: 'MARKET_STATUS'
+    //   },
+    //   // proxy: {
+    //   //   host: 'http://127.0.0.1', port: 1080               
+    //   // },
+    //   timeout: 30000
+    // });
+
+    const res = await axios.get('https://www.alphavantage.co/query?apikey=JO90E8HQ3QGVRJ98&function=MARKET_STATUS');
     if (res.data['Note']) {
       console.warn('Alpha Vantage API rate limit likely reached:', res.data['Note']);
       return null;

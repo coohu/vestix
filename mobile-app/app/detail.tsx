@@ -1,10 +1,11 @@
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { View, Text, StyleSheet, ActivityIndicator, Dimensions } from 'react-native';
-import { useSharedValue,  runOnJS } from 'react-native-reanimated';
 import { Canvas, Path, Skia } from '@shopify/react-native-skia';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSharedValue } from 'react-native-reanimated';
 import React, { useEffect, useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
+import { runOnJS } from 'react-native-reanimated';
 import Constants from 'expo-constants';
 
 const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL ??
@@ -82,7 +83,7 @@ export default function DetailScreen() {
   });
 
   const longPressGesture = Gesture.LongPress().onEnd((e) => {
-      runOnJS(setCrosshair)({ x: e.x, y: e.y });
+    runOnJS(setCrosshair)({ x: e.x, y: e.y });
   });
 
   const composedGesture = Gesture.Race(panGesture, pinchGesture, longPressGesture);
