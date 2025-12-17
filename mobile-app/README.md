@@ -77,6 +77,9 @@ Join our community of developers creating universal apps.
     
    adb devices
     
+   #本地 build
+   eas build --platform android --profile preview --local
+   eas build --platform android --profile preview --local --output="./vestix.apk"
     
 ```
     

@@ -18,3 +18,5 @@ expo-env.d.ts
 # @end expo-cli
 *.jar
 *.aab
+*.apks
+*.log
