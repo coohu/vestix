@@ -16,3 +16,6 @@ dist/
 
 expo-env.d.ts
 # @end expo-cli
+*.apks
+*.jar
+*.aab

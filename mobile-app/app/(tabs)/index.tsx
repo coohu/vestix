@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "flex-start",
     marginBottom: 16,
-    gap:5,
+    gap:8,
   },
   main: {
     flex: 1,

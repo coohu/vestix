@@ -48,6 +48,8 @@ const useAppStore = create<AppStore>((set, get) => ({
     fx: [],
     watchlist: [],
     status: [],
+    future: [],
+    stock: [],
   },
   loading: {
     crypto: false,
@@ -56,6 +58,8 @@ const useAppStore = create<AppStore>((set, get) => ({
     fx: false,
     watchlist: false,
     status: false,
+    future: false,
+    stock: false,
   },
   watchlistSymbols: [],
   error: null,
