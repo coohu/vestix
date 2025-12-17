@@ -1,8 +1,7 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Constants from 'expo-constants';
-const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL ??
-  process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://100.64.0.1:3000'
+import * as CoinGecko from '@/services/CoinGecko';
+import * as AlphaVantage from '@/services/AlphaVantage';
 
 export type MarketCategory = 'crypto' | 'index' | 'metal' | 'fx' | 'watchlist' | 'status' | 'future' | 'stock';
 
@@ -13,6 +12,15 @@ export interface Asset {
   price?: number;
   changePercent?: number;
   [key: string]: any;
+}
+
+export interface KlineData {
+    time: number;
+    open: number;
+    high: number;
+    low: number;
+    close: number;
+    volume?: number;
 }
 
 export interface MarketStatus {
@@ -33,11 +41,13 @@ export interface WatchlistItem {
 interface AppStore {
   markets: Record<MarketCategory, Asset[]> ;
   loading: Record<MarketCategory, boolean>;
+  klineData: KlineData[];
   watchlistSymbols: WatchlistItem[];
   error: string | null;
   loadWatchlist: () => Promise<void>;
   toggleWatchlist: (asset: Asset) => Promise<void>;
   fetchMarketData: (category: MarketCategory) => Promise<void>;
+  fetchKlineData: (symbol: string, category: MarketCategory, interval: string) => Promise<void>;
 }
 
 const useAppStore = create<AppStore>((set, get) => ({
@@ -48,6 +58,8 @@ const useAppStore = create<AppStore>((set, get) => ({
     fx: [],
     watchlist: [],
     status: [],
+    future: [],
+    stock: [],
   },
   loading: {
     crypto: false,
@@ -56,7 +68,10 @@ const useAppStore = create<AppStore>((set, get) => ({
     fx: false,
     watchlist: false,
     status: false,
+    future: false,
+    stock: false,
   },
+  klineData: [],
   watchlistSymbols: [],
   error: null,
 
@@ -97,25 +112,45 @@ const useAppStore = create<AppStore>((set, get) => ({
       error: null
     }));
     try {
-      if (category === 'watchlist') {
-        const { watchlistSymbols, markets } = get();
-        const currentWatchlist = Array.isArray(watchlistSymbols) ? watchlistSymbols : [];
-        const allMarkets = Object.values(markets).flat();
-        const watchlistData = allMarkets.filter((asset) => 
-          currentWatchlist.some((item) => item.symbol === asset.symbol)
-        );
-        set((state) => ({
-          markets: { ...state.markets, watchlist: watchlistData },
-          loading: { ...state.loading, watchlist: false },
-        }));
-        return;
+      let data: any[] = [];
+      switch (category) {
+        case 'crypto':
+          data = await CoinGecko.getMarketData();
+          break;
+        case 'index':
+          data = await AlphaVantage.getGlobalIndices();
+          break;
+        case 'metal':
+          data = await AlphaVantage.getMetalsData();
+          break;
+        case 'fx':
+          data = await AlphaVantage.getFxData();
+          break;
+        case 'status':
+          data = await AlphaVantage.marketStatus();
+          break;
+        case 'future':
+          data = [{
+            symbol: 'CL',
+            name: 'Crude Oil Future',
+            category: 'future',
+            price: 80.50,
+            change: 1.25,
+            changePercent: 1.57,
+            timestamp: Date.now(),
+          }];
+          break;
+        case 'watchlist':
+          const { watchlistSymbols, markets } = get();
+          const currentWatchlist = Array.isArray(watchlistSymbols) ? watchlistSymbols : [];
+          const allMarkets = Object.values(markets).flat();
+          data = allMarkets.filter((asset) =>
+            currentWatchlist.some((item) => item.symbol === asset.symbol)
+          );
+          break;
+        default:
+          break;
       }
-      console.log(`Fetching data for category: ${API_BASE_URL}/markets?category=${category}`);
-      const res = await fetch(`${API_BASE_URL}/markets?category=${category}`);
-      if (!res.ok) {
-        throw new Error(`Failed to fetch ${category} data`);
-      }
-      const data: Asset = await res.json();
       set((state) => ({
         markets: { ...state.markets, [category]: data },
         loading: { ...state.loading, [category]: false },
@@ -125,6 +160,35 @@ const useAppStore = create<AppStore>((set, get) => ({
         error: error.message || 'An error occurred', 
         loading: { ...state.loading, [category]: false } 
       }));
+    }
+  },
+
+  fetchKlineData: async (symbol: string, category: MarketCategory, interval: string) => {
+    set({ klineData: [] }); // Clear previous data
+    try {
+      let data: KlineData[] | null = [];
+      if (category === 'crypto') {
+        const coinList = await CoinGecko.getCoinList();
+        if (!coinList) {
+          throw new Error('Could not fetch coin list');
+        }
+        const coinId = coinList.get(symbol.toUpperCase());
+        if (coinId) {
+          const days = interval.includes('d') ? '365' : interval.includes('h') ? '30' : '1';
+          data = await CoinGecko.getKlineData(coinId, days);
+        } else {
+          throw new Error(`Symbol ${symbol} not found`);
+        }
+      } else if (category === 'index' || category === 'stock') {
+        data = await AlphaVantage.getKlineData(symbol, interval);
+      }
+      // Add other categories (metal, fx, future) if needed
+
+      if(data) {
+        set({ klineData: data });
+      }
+    } catch (error: any) {
+      set({ error: error.message || 'An error occurred' });
     }
   },
 
