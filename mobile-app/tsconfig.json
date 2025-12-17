@@ -1,6 +1,12 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
+    "target": "ESNext",
+    "lib": [
+      "ESNext",                 /* 包含最新的 ES 特性，包括 Promise 和 Async */
+      "DOM",                    /* 如果是 Web 项目需要这个 */
+      "DOM.Iterable"
+    ],
     "jsx": "react-jsx",
     "moduleResolution": "bundler",
     "module": "esnext",

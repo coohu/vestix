@@ -118,7 +118,18 @@ const useAppStore = create<AppStore>((set, get) => ({
           data = await CoinGecko.getMarketData();
           break;
         case 'index':
-          data = await AlphaVantage.getGlobalIndices();
+          const kdd :Record<string, any[]> = await AlphaVantage.getGlobalIndices();
+          for (const key of Object.keys(kdd)) {
+            const it = kdd[key].pop()
+            data.push({
+              name: key,
+              open: it.open,
+              high: it.high,
+              low: it.low,
+              volume: it.volume,
+              timestamp: it.time,
+            });
+          }
           break;
         case 'metal':
           data = await AlphaVantage.getMetalsData();
@@ -131,12 +142,12 @@ const useAppStore = create<AppStore>((set, get) => ({
           break;
         case 'future':
           data = [{
-            symbol: 'CL',
-            name: 'Crude Oil Future',
-            category: 'future',
-            price: 80.50,
-            change: 1.25,
-            changePercent: 1.57,
+            name: 'Crude Oil (CL)',
+            open: 80.50,
+            high: 1.25,
+            low: 1.57,
+            close: 1.57,
+            volume: 1234,
             timestamp: Date.now(),
           }];
           break;
@@ -183,7 +194,6 @@ const useAppStore = create<AppStore>((set, get) => ({
         data = await AlphaVantage.getKlineData(symbol, interval);
       }
       // Add other categories (metal, fx, future) if needed
-
       if(data) {
         set({ klineData: data });
       }

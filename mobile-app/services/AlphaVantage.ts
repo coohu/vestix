@@ -21,7 +21,7 @@ async function fetchData(cacheKey: string, params: any) {
       return null;
     }
     if (res.data['Error Message']) {
-      console.error('Alpha Vantage API Error:', res.data['Error Message']);
+      console.error('Alpha Vantage API Error:', res.data['Error Message'], params);
       return null;
     }
 
@@ -69,9 +69,9 @@ function transformFxDaily(dailyData: any, symbol: string, name: string, category
   };
 }
 
-export async function getGlobalIndices() {
-  const cacheKey = 'global-indices';
-  const cached = await getCache<any[]>(cacheKey);
+export async function getGlobalIndices(): Promise<Record<string, any[]>> {
+  const cacheKey = 'kline-global-indices-1d'
+  const cached = await getCache<Record<string, any[]>>(cacheKey);
   if (cached) return cached;
 
   const symbols = [
@@ -82,19 +82,32 @@ export async function getGlobalIndices() {
     { symbol: '000300.SS', name: 'CSI 300' },
   ];
 
-  const results = [];
+  const results : Record<string, any[]> = {};
   for (const s of symbols) {
-    const data = await fetchData(`index-${s.symbol}`, { function: 'GLOBAL_QUOTE', symbol: s.symbol });
-    if (data && data['Global Quote']) {
-      const transformed = transformGlobalQuote(data['Global Quote'], s.name, 'index');
-      if (transformed) {
-        results.push(transformed);
-      }
+    const data = await fetchData(cacheKey, {function: 'TIME_SERIES_DAILY', symbol: s.symbol});
+    const dld = data['Time Series (Daily)']
+    if(!data || !dld) {
+      continue;
     }
-    // The delay is to respect API rate limits, not needed for caching logic itself
+    for (const ts of Object.keys(dld)) {
+      const series = dld[ts];
+      const kdd = Object.keys(series)
+        .map(timestamp => ({
+          time: new Date(timestamp).getTime(),
+          open: parseFloat(series['1. open']),
+          high: parseFloat(series['2. high']),
+          low: parseFloat(series['3. low']),
+          close: parseFloat(series['4. close']),
+          volume: parseInt(series['5. volume'] || '0', 10),
+        }))
+        .sort((a, b) => a.time - b.time);
+      results[`${s.name}(${s.symbol})`] = kdd;
+    }
     await new Promise(resolve => setTimeout(resolve, 15000));
   }
-  await setCache(cacheKey, results);
+  if(Object.keys(results).length > 0) {
+    await setCache(cacheKey, results);
+  }
   return results;
 }
 
@@ -154,9 +167,9 @@ export async function getFxData() {
 }
 
 export async function searchAssets(keywords: string) {
-    const cacheKey = `search-${keywords}`;
-    const cached = await getCache<any[]>(cacheKey);
-    if (cached) return cached;
+  const cacheKey = `search-${keywords}`;
+  const cached = await getCache<any[]>(cacheKey);
+  if (cached) return cached;
 
   const data = await fetchData(cacheKey, { function: 'SYMBOL_SEARCH', keywords });
   if (data && data.bestMatches) {
@@ -236,4 +249,14 @@ export async function getKlineData(symbol: string, interval = '1d') {
     return results;
   }
   return [];
+}
+
+export async function getCommodities(params:Record<string, string>){
+  const {function:func, interval, datatype} = params
+  const cacheKey = `commodities-${func}-${interval}`;
+  const cached = await getCache<any[]>(cacheKey);
+  if (cached) return cached;
+  if (!['daily', 'weekly', 'monthly'].includes(interval)){
+    return null
+  }
 }

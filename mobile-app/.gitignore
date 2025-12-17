@@ -20,3 +20,14 @@ expo-env.d.ts
 *.aab
 *.apks
 *.log
+*.keystore
+*.p12
+*.jks
+*.mobileprovision
+*.xcarchive
+*.ipa
+*.dSYM.zip
+*.xcuserstate   
+*.hmap
+*.apk
+build/

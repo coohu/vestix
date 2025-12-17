@@ -20,7 +20,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
-      <Tabs.Screen name="market"
+      <Tabs.Screen name="markets"
         options={{
           title: 'Markets',
           tabBarIcon: ({ color, focused }) => (
