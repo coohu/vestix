@@ -48,3 +48,23 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+```bash
+    npm install -g expo-cli
+    # 或者使用 yarn
+    # yarn global add expo-cli
+    
+
+   npm install -g eas-cli
+    # 或者使用 yarn
+    # yarn global add eas-cli
+    
+
+   eas login
+   eas build:configure
+   eas build --platform android --profile production
+   npx expo install expo-image-picker
+   npx expo install @expo/config-plugins@6.0.0 # 确保版本兼容
+   npx expo-optimize # 优化图片
+```
+    
