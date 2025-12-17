@@ -66,5 +66,17 @@ Join our community of developers creating universal apps.
    npx expo install expo-image-picker
    npx expo install @expo/config-plugins@6.0.0 # 确保版本兼容
    npx expo-optimize # 优化图片
+
+   java -jar bundletool.jar get-device-spec --output=device-spec.json
+   bundletool.jar get-device-spec --output=device-spec.json
+   bundletool.jar build-apks --bundle=application-2fb28d3e-edc8-404b-baad-5b4abbfaac4d.aab --output=app.apks --device-spec=device-spec.json
+    
+   # 安装
+   bundletool.jar install-apks --apks=app.apks
+   java -jar bundletool.jar install-apks --apks=app.apks
+    
+   adb devices
+    
+    
 ```
     
