@@ -1,18 +1,19 @@
-const axios = require('axios');
+import axios from 'axios';
+import { getCache, setCache } from './Cache';
+
 const BASE_URL = 'https://www.alphavantage.co/query';
+const API_KEY = 'JO90E8HQ3QGVRJ98';
 
-const cache = new Map();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
-async function fetchData( cacheKey, params ) {
-  const cached = cache.get(cacheKey);
-  if (cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
-    return cached.data;
+async function fetchData(cacheKey: string, params: any) {
+  const cachedData = await getCache<any>(cacheKey);
+  if (cachedData) {
+    return cachedData;
   }
+
   try {
     const res = await axios.get(BASE_URL, {
-      params: {apikey:process.env.API_KEY || 'JO90E8HQ3QGVRJ98', ...params},
-      timeout: 30000
+      params: { apikey: API_KEY, ...params },
+      timeout: 30000,
     });
 
     if (res.data['Note']) {
@@ -23,16 +24,16 @@ async function fetchData( cacheKey, params ) {
       console.error('Alpha Vantage API Error:', res.data['Error Message']);
       return null;
     }
-    cache.set(cacheKey, { timestamp: Date.now(), data: res.data });
-    console.log()
+
+    await setCache(cacheKey, res.data);
     return res.data;
   } catch (error) {
-    console.error(`Error fetching ${cacheKey} from Alpha Vantage:`, error.message);
+    console.error(`Error fetching from Alpha Vantage:`, error);
     return null;
   }
 }
 
-function transformGlobalQuote( quote, name, category ) {
+function transformGlobalQuote(quote: any, name: string, category: string) {
   if (!quote || !quote['01. symbol']) return null;
   return {
     symbol: quote['01. symbol'],
@@ -45,9 +46,9 @@ function transformGlobalQuote( quote, name, category ) {
   };
 }
 
-function transformFxDaily( dailyData, symbol, name, category ) {
+function transformFxDaily(dailyData: any, symbol: string, name: string, category: string) {
   if (!dailyData) return null;
-  const dates = Object.keys(dailyData).sort((a, b) => new Date(b) - new Date(a));
+  const dates = Object.keys(dailyData).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
   if (dates.length < 2) return null;
 
   const latest = dailyData[dates[0]];
@@ -65,10 +66,14 @@ function transformFxDaily( dailyData, symbol, name, category ) {
     change: change,
     changePercent: changePercent,
     timestamp: new Date(dates[0]).getTime(),
-  }
+  };
 }
 
-async function getGlobalIndices() {
+export async function getGlobalIndices() {
+  const cacheKey = 'global-indices';
+  const cached = await getCache<any[]>(cacheKey);
+  if (cached) return cached;
+
   const symbols = [
     { symbol: 'SPY', name: 'S&P 500' },
     { symbol: 'QQQ', name: 'NASDAQ 100' },
@@ -83,15 +88,21 @@ async function getGlobalIndices() {
     if (data && data['Global Quote']) {
       const transformed = transformGlobalQuote(data['Global Quote'], s.name, 'index');
       if (transformed) {
-          results.push(transformed);
+        results.push(transformed);
       }
     }
+    // The delay is to respect API rate limits, not needed for caching logic itself
     await new Promise(resolve => setTimeout(resolve, 15000));
   }
+  await setCache(cacheKey, results);
   return results;
 }
 
-async function getMetalsData() {
+export async function getMetalsData() {
+    const cacheKey = 'metals-data';
+    const cached = await getCache<any[]>(cacheKey);
+    if (cached) return cached;
+
   const metals = [
     { from: 'XAU', to: 'USD', name: 'Gold' },
     { from: 'XAG', to: 'USD', name: 'Silver' },
@@ -99,8 +110,10 @@ async function getMetalsData() {
 
   const results = [];
   for (const m of metals) {
-    const data = await fetchData(`metal-${m.from}`, { 
-      function: 'FX_DAILY', from_symbol: m.from, to_symbol: m.to 
+    const data = await fetchData(`metal-${m.from}`,{
+      function: 'FX_DAILY',
+      from_symbol: m.from,
+      to_symbol: m.to,
     });
     if (data && data['Time Series FX (Daily)']) {
       const transformed = transformFxDaily(data['Time Series FX (Daily)'], `${m.from}/${m.to}`, m.name, 'metal');
@@ -110,10 +123,15 @@ async function getMetalsData() {
     }
     await new Promise(resolve => setTimeout(resolve, 15000));
   }
+  await setCache(cacheKey, results);
   return results;
 }
 
-async function getFxData() {
+export async function getFxData() {
+    const cacheKey = 'fx-data';
+    const cached = await getCache<any[]>(cacheKey);
+    if (cached) return cached;
+
   const pairs = [
     { from: 'EUR', to: 'USD', name: 'EUR/USD' },
     { from: 'USD', to: 'JPY', name: 'USD/JPY' },
@@ -122,7 +140,7 @@ async function getFxData() {
 
   const results = [];
   for (const p of pairs) {
-    const data = await fetchData(`fx-${p.from}${p.to}`, { function: 'FX_DAILY', from_symbol: p.from, to_symbol: p.to });
+    const data = await fetchData(`fx-${p.from}${p.to}`,{ function: 'FX_DAILY', from_symbol: p.from, to_symbol: p.to });
     if (data && data['Time Series FX (Daily)']) {
       const transformed = transformFxDaily(data['Time Series FX (Daily)'], `${p.from}/${p.to}`, p.name, 'fx');
       if (transformed) {
@@ -131,19 +149,18 @@ async function getFxData() {
     }
     await new Promise(resolve => setTimeout(resolve, 15000));
   }
+  await setCache(cacheKey, results);
   return results;
 }
 
-async function searchAssets(keywords) {
-  const cacheKey = `search-${keywords}`;
-  const cached = cache.get(cacheKey);
-  if (cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
-    return cached.data;
-  }
+export async function searchAssets(keywords: string) {
+    const cacheKey = `search-${keywords}`;
+    const cached = await getCache<any[]>(cacheKey);
+    if (cached) return cached;
 
-  const data = await fetchData(cacheKey, { function: 'SYMBOL_SEARCH', keywords })
+  const data = await fetchData(cacheKey, { function: 'SYMBOL_SEARCH', keywords });
   if (data && data.bestMatches) {
-    const unifiedData = data.bestMatches.map(m => ({
+    const results = data.bestMatches.map((m: any) => ({
       symbol: m['1. symbol'],
       name: m['2. name'],
       category: 'search',
@@ -152,33 +169,32 @@ async function searchAssets(keywords) {
       changePercent: 0,
       timestamp: Date.now(),
     }));
-    cache.set(cacheKey, { timestamp: Date.now(), data: unifiedData });
-    return unifiedData;
+    await setCache(cacheKey, results);
+    return results;
   }
   return [];
 }
 
-async function marketStatus() {
+export async function marketStatus() {
   const cacheKey = `market-status`;
-  const cached = cache.get(cacheKey);
-  if (cached && (Date.now() - cached.timestamp < 60 * 60 * 1000)) { // 60 minutes
-    return cached.data;
-  }
-  const data = await fetchData(cacheKey, { function: 'MARKET_STATUS' })
+  // Use a longer TTL of 60 minutes for market status
+  const cached = await getCache<any[]>(cacheKey, 60 * 60 * 1000);
+  if (cached) return cached;
+
+  const data = await fetchData(cacheKey, { function: 'MARKET_STATUS' });
   if (Array.isArray(data?.markets) && data.markets?.length > 0) {
-    cache.set(cacheKey, { timestamp: Date.now(), data: data.markets });
+    await setCache(cacheKey, data.markets);
     return data.markets;
   }
   return [];
 }
 
-async function getKlineData(symbol, interval = '1d') {
-  const cacheKey = `kline-${symbol}-${interval}`;
-  const cached = cache.get(cacheKey);
-  if (cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
-    return cached.data;
-  }
-  const functionMap = {
+export async function getKlineData(symbol: string, interval = '1d') {
+    const cacheKey = `kline-${symbol}-${interval}`;
+    const cached = await getCache<any[]>(cacheKey);
+    if (cached) return cached;
+
+  const functionMap: { [key: string]: string } = {
     '1min': 'TIME_SERIES_INTRADAY',
     '5min': 'TIME_SERIES_INTRADAY',
     '15min': 'TIME_SERIES_INTRADAY',
@@ -188,13 +204,14 @@ async function getKlineData(symbol, interval = '1d') {
     '1wk': 'TIME_SERIES_WEEKLY',
     '1mo': 'TIME_SERIES_MONTHLY',
   };
-  const func = functionMap[interval] || 'TIME_SERIES_DAILY'
-  const params = {
-    function: func, symbol: symbol,
-    ...(func === 'TIME_SERIES_INTRADAY' && { interval: interval })
+  const func = functionMap[interval] || 'TIME_SERIES_DAILY';
+  const params: any = {
+    function: func,
+    symbol: symbol,
+    ...(func === 'TIME_SERIES_INTRADAY' && { interval: interval }),
   };
   const data = await fetchData(cacheKey, params);
-  let timeSeriesKey = null;
+  let timeSeriesKey: string | null = null;
   if (data) {
     for (const key of Object.keys(data)) {
       if (key.includes('Time Series')) {
@@ -205,19 +222,18 @@ async function getKlineData(symbol, interval = '1d') {
   }
   if (data && timeSeriesKey && data[timeSeriesKey]) {
     const series = data[timeSeriesKey];
-    const unifiedData = Object.keys(series).map(timestamp => ({
-      time: new Date(timestamp).getTime(),
-      open: parseFloat(series[timestamp]['1. open']),
-      high: parseFloat(series[timestamp]['2. high']),
-      low: parseFloat(series[timestamp]['3. low']),
-      close: parseFloat(series[timestamp]['4. close']),
-      volume: parseInt(series[timestamp]['5. volume'] || '0', 10),
-    })).sort((a, b) => a.time - b.time);
-
-    cache.set(cacheKey, { timestamp: Date.now(), data: unifiedData });
-    return unifiedData;
+    const results = Object.keys(series)
+      .map(timestamp => ({
+        time: new Date(timestamp).getTime(),
+        open: parseFloat(series[timestamp]['1. open']),
+        high: parseFloat(series[timestamp]['2. high']),
+        low: parseFloat(series[timestamp]['3. low']),
+        close: parseFloat(series[timestamp]['4. close']),
+        volume: parseInt(series[timestamp]['5. volume'] || '0', 10),
+      }))
+      .sort((a, b) => a.time - b.time);
+    await setCache(cacheKey, results);
+    return results;
   }
   return [];
 }
-
-module.exports = { getGlobalIndices, getMetalsData, getFxData, searchAssets, marketStatus, getKlineData };
