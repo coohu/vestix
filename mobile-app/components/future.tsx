@@ -8,11 +8,11 @@ import { useEffect } from 'react';
 const MarketListItem = ({ item }:any) => {
   const { watchlistSymbols, toggleWatchlist } = useAppStore();
   const isWatched = watchlistSymbols.some(w => w.symbol === item.symbol);
-
+  const value = parseFloat(item.value).toFixed(2)
   return (
     <TouchableOpacity style={styles.listItem}>
       <View style={{display:'flex', flexDirection:'row', justifyContent:'space-between', width:'100%'}}>
-        <View style={{flexDirection:'row', alignItems:'center',justifyContent:'flex-start', width:180}}>
+        <View style={{flexDirection:'row', alignItems:'center',justifyContent:'flex-start', width:250}}>
           <TouchableOpacity onPress={() => toggleWatchlist(item)} style={styles.watchButton}>
             <Ionicons name={isWatched ? "star" : "star-outline"} size={24} color={isWatched ? "gold" : "gray"} />
           </TouchableOpacity>
@@ -20,17 +20,15 @@ const MarketListItem = ({ item }:any) => {
             <Text style={styles.itemSymbol}>{item.name}</Text>
           </Link>
         </View>
-          <Text style={[styles.itemPrice,styles.w50, styles.alignRight]}>{item.open?`${item.open}`:''}</Text>
-          <Text style={[styles.itemPrice,styles.w50, styles.alignRight]}>{item.high?`${item.high}`:''}</Text>
-          <Text style={[styles.itemPrice,styles.w50, styles.alignRight]}>{item.low?`${item.low}`:''}</Text>
-          <Text style={[styles.itemPrice,styles.w50, styles.alignRight]}>{item.close?`${item.close}`:''}</Text>
-          <Text style={[styles.itemPrice,styles.w100, styles.alignRight]}>{item.volume}</Text>
+          <Text style={[styles.itemPrice,styles.w100, styles.alignRight]}>{value}</Text>
+          <Text style={[styles.itemPrice,styles.w250, styles.alignRight]}>{item.unit}</Text>
+          <Text style={[styles.itemPrice,styles.w100, styles.alignRight]}>{item.date}</Text>
       </View>
     </TouchableOpacity>
   );
 };
 
-export default function SecuritiesList ({ category }:{category: MarketCategory}){
+export default function FutureList ({ category }:{category: MarketCategory}){
   const { markets, loading, fetchMarketData } = useAppStore();
   const data = markets[category];
   useEffect(() => { fetchMarketData(category)  }, [category, fetchMarketData]);
@@ -41,16 +39,12 @@ export default function SecuritiesList ({ category }:{category: MarketCategory})
   return (
   <View style={{ flex: 1, flexDirection:'column' }}>
     <View style={{ flexDirection:'row', display:'flex',justifyContent:'space-between'}}>
-      <Text style={[styles.header,styles.w180, styles.alignRight]}>
-        {category=='crypto'?'币种':'名称'}
-      </Text>
-      <Text style={[styles.header,styles.w50, styles.alignRight]}>开盘</Text>
-      <Text style={[styles.header,styles.w50, styles.alignRight]}>最高</Text>
-      <Text style={[styles.header,styles.w50, styles.alignRight]}>最低</Text>
-      <Text style={[styles.header,styles.w50, styles.alignRight]}>收盘</Text>
-      <Text style={[styles.header,styles.w100, styles.alignLeft]}>成交</Text>
+      <Text style={[styles.header,styles.w250, styles.alignRight]}>名称</Text>
+      <Text style={[styles.header,styles.w100, styles.alignRight]}>价格</Text>
+      <Text style={[styles.header,styles.w250, styles.alignRight]}>单位</Text>
+      <Text style={[styles.header,styles.w100, styles.alignLeft]}>日期</Text>
     </View>
-    <FlashList data={data}
+    <FlashList data={data.filter(it=>it.value)}
       renderItem={({ item }) => <MarketListItem item={item} />}
       keyExtractor={item => item.symbol}
       onRefresh={() => fetchMarketData(category)}
@@ -59,21 +53,16 @@ export default function SecuritiesList ({ category }:{category: MarketCategory})
   </View>);
 };
 
-
-
 const styles = StyleSheet.create({
   header: {
     fontSize: 14,
     padding: 8,
   },
-  w50:{
-    width:50
-  },
-  w180:{
-    width:180
+  w250:{
+    width:250
   },
   w100:{
-    width:120
+    width:100
   },
   alignLeft:{
     textAlign:'left',

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as CoinGecko from '@/services/CoinGecko';
 import * as AlphaVantage from '@/services/AlphaVantage';
+import { convertTimeZone } from '@/components/dateTimeFmt';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type MarketCategory = 'crypto' | 'index' | 'metal' | 'fx' | 'watchlist' | 'status' | 'future' | 'stock';
 
@@ -15,12 +15,12 @@ export interface Asset {
 }
 
 export interface KlineData {
-    time: number;
-    open: number;
-    high: number;
-    low: number;
-    close: number;
-    volume?: number;
+  time: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume?: number;
 }
 
 export interface MarketStatus {
@@ -115,42 +115,71 @@ const useAppStore = create<AppStore>((set, get) => ({
       let data: any[] = [];
       switch (category) {
         case 'crypto':
-          data = await CoinGecko.getMarketData();
-          break;
-        case 'index':
-          const kdd :Record<string, any[]> = await AlphaVantage.getGlobalIndices();
-          for (const key of Object.keys(kdd)) {
-            const it = kdd[key].pop()
-            data.push({
-              name: key,
-              open: it.open,
-              high: it.high,
-              low: it.low,
-              volume: it.volume,
-              timestamp: it.time,
-            });
+          const tkPairs = [
+            { from: 'BTC', to: 'USD', name: 'BTC/USD' },
+            { from: 'ETH', to: 'USD', name: 'ETH/USD' },
+          ];
+          for(const {from, to, name} of tkPairs){
+            const currs = await AlphaVantage.getCryptoCurrencies(from, to);
+            const transformed = AlphaVantage.transformedCryptoCurrencies(currs);
+            if(transformed){
+              data.push({...transformed, name, symbol:`${from}/${to}`})
+            }
+            await new Promise(resolve => setTimeout(resolve, 15000));
           }
           break;
-        case 'metal':
-          data = await AlphaVantage.getMetalsData();
+
+        case 'index':
+          const symbols = [
+            { symbol: 'SPY', name: 'S&P 500' },
+            { symbol: 'QQQ', name: 'NASDAQ 100' },
+            { symbol: 'XIU.TRT', name: 'TSX 60' },
+            { symbol: '^N225', name: 'Nikkei 225' },
+            { symbol: '000300.SS', name: 'CSI 300' },
+          ];
+          for (const {symbol, name} of symbols) {
+            const scd = await AlphaVantage.getKlineData(symbol);
+            const its = AlphaVantage.transformSecurities(scd);
+            if( its ){
+              data.push({...its, name, symbol})
+            }
+            await new Promise(resolve => setTimeout(resolve, 15000));
+          }
           break;
+          
         case 'fx':
-          data = await AlphaVantage.getFxData();
+          const pairs = [
+            { from: 'EUR', to: 'USD', name: 'EUR/USD' },
+            { from: 'USD', to: 'JPY', name: 'USD/JPY' },
+            { from: 'USD', to: 'CNY', name: 'USD/CNY' },
+          ];
+          for (const {from, to, name} of pairs){
+            const rates = await AlphaVantage.getForex(
+              {function:'FX_DAILY',from_symbol:from, to_symbol:to, interval:'1d'}
+            );
+            const rts = AlphaVantage.transformedForex(rates);
+            if( rts ){
+              data.push({...rts, name, symbol:`${from}/${to}`})
+            }
+            await new Promise(resolve => setTimeout(resolve, 15000));
+          }
           break;
+           
         case 'status':
-          data = await AlphaVantage.marketStatus();
+          data = await AlphaVantage.marketStatus()
           break;
+          
         case 'future':
-          data = [{
-            name: 'Crude Oil (CL)',
-            open: 80.50,
-            high: 1.25,
-            low: 1.57,
-            close: 1.57,
-            volume: 1234,
-            timestamp: Date.now(),
-          }];
+          const tgs =['WTI', 'BRENT', 'NATURAL_GAS', 'COPPER','ALUMINUM','ALL_COMMODITIES']
+          for( const tg of tgs){
+            const cdt = await AlphaVantage.getCommodities({function:tg, interval:'daily'});
+            if (cdt && cdt.hasOwnProperty('name') && cdt.hasOwnProperty('data')){
+              const it = cdt.data[0]
+              data.push({name:cdt.name, symbol:tg, unit:cdt.unit, ...it})
+            }
+          }
           break;
+
         case 'watchlist':
           const { watchlistSymbols, markets } = get();
           const currentWatchlist = Array.isArray(watchlistSymbols) ? watchlistSymbols : [];
@@ -159,6 +188,7 @@ const useAppStore = create<AppStore>((set, get) => ({
             currentWatchlist.some((item) => item.symbol === asset.symbol)
           );
           break;
+          
         default:
           break;
       }
@@ -178,22 +208,9 @@ const useAppStore = create<AppStore>((set, get) => ({
     set({ klineData: [] }); // Clear previous data
     try {
       let data: KlineData[] | null = [];
-      if (category === 'crypto') {
-        const coinList = await CoinGecko.getCoinList();
-        if (!coinList) {
-          throw new Error('Could not fetch coin list');
-        }
-        const coinId = coinList.get(symbol.toUpperCase());
-        if (coinId) {
-          const days = interval.includes('d') ? '365' : interval.includes('h') ? '30' : '1';
-          data = await CoinGecko.getKlineData(coinId, days);
-        } else {
-          throw new Error(`Symbol ${symbol} not found`);
-        }
-      } else if (category === 'index' || category === 'stock') {
+      if (category === 'index' || category === 'stock') {
         data = await AlphaVantage.getKlineData(symbol, interval);
       }
-      // Add other categories (metal, fx, future) if needed
       if(data) {
         set({ klineData: data });
       }

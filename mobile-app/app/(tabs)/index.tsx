@@ -7,8 +7,8 @@ export default function Index() {
   useEffect(() => { fetchMarketData('status')  }, [fetchMarketData]);
   return (
   <View style={styles.container}>
-    {loading.status ? <ActivityIndicator size="large" /> : <>
-      {markets.status?.map((status:any, index:number) =>
+    {loading.status && <ActivityIndicator size="large" /> }
+    {markets.status.length && markets.status?.map((status:any, index:number) =>
       <View style={styles.col} key={index}>
         <View style={styles.main} key={index}>
           <Text style={styles.title}>{status.region}</Text>
@@ -20,10 +20,9 @@ export default function Index() {
         </View>
         <Text style={styles.subtitle}>{status.notes}</Text>
       </View>
-      )}
-    </>}
+    )}
   </View>);
-}
+} 
 
 const styles = StyleSheet.create({
   container: {

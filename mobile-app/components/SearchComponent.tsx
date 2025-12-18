@@ -1,6 +1,6 @@
 import { View, TextInput, FlatList, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import * as AlphaVantage from '@/services/AlphaVantage';
 import { MarketCategory } from '@/hooks/use-app-store';
-import Constants from 'expo-constants';
 import { Link } from 'expo-router';
 import { useState } from 'react';
 import { create } from 'zustand';
@@ -22,41 +22,22 @@ interface SearchState {
 interface SearchActions {
   searchAssets: (query: string) => Promise<void>;
 }
-
 type SearchStore = SearchState & SearchActions;
 
-const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL ??
-  process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://127.0.0.1:3000';
-
-const useSearchStore = create<SearchStore>()((set, get) => ({
+const useSearchStore = create<SearchStore>()((set) => ({
   results: [],
   loading: false,
   error: null,
 
   searchAssets: async (query: string) => {
-    // Trim query and check for empty string
     const trimmedQuery = query.trim();
     if (!trimmedQuery) {
       set({ results: [], loading: false, error: null });
       return;
     }
-   
     set({ loading: true, error: null });
-    
-    try {
-      const res = await fetch(`${API_BASE_URL}/search?query=${trimmedQuery}`);
-      
-      if (!res.ok) {
-        throw new Error('Failed to fetch search results');
-      }
-      
-      const data: SearchAsset[] = await res.json();
-      set({ results: data, loading: false });
-      
-    } catch (e) {
-      const errorMessage = e instanceof Error ? e.message : 'An unknown search error occurred';
-      set({ error: errorMessage, loading: false });
-    }
+    const results = await AlphaVantage.searchAssets(trimmedQuery);
+    set({ results, loading: false });
   },
 }));
 
@@ -81,16 +62,14 @@ export default function SearchComponent() {
 
   return (
     <View style={styles.container}>
-      <TextInput
+      <TextInput placeholder="搜索..."
         style={styles.input}
-        placeholder="Search assets..."
         value={query}
         onChangeText={handleSearch} // TypeScript knows 'text' is a string
       />
       {loading && <ActivityIndicator />}
-      {results.length > 0 && query.length > 0 && ( // Only show if there's a non-empty query
-        <FlatList
-          data={results}
+      {results.length > 0 && query.length > 0 && ( 
+        <FlatList data={results}
           renderItem={renderItem}
           keyExtractor={(item) => item.symbol}
           style={styles.resultsList}
