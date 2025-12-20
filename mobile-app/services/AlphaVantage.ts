@@ -4,12 +4,23 @@ import { getCache, setCache } from './Cache';
 
 const BASE_URL = 'https://www.alphavantage.co/query';
 const API_KEY = 'JO90E8HQ3QGVRJ98';
+const MIN_INTERVAL = 1100
+let lastScheduledTime = 0
 
 export async function fetchData(cacheKey: string, params: any) {
   const cachedData = await getCache<any>(cacheKey);
   if (cachedData) {
     return cachedData;
   }
+
+  const now = Date.now();
+  const executeAt = Math.max(now, lastScheduledTime + MIN_INTERVAL);
+  lastScheduledTime = executeAt;
+  const waitTime = executeAt - now;
+  if (waitTime > 0) {
+    await new Promise(resolve => setTimeout(resolve, waitTime));
+  }
+
   try {
     const res = await axios.get(BASE_URL, {
       params: { apikey: API_KEY, ...params },
@@ -118,7 +129,7 @@ export async function getForex(param:ForexParam) {
     return null
   }
   const cacheKey = `fx-${from_symbol}-${to_symbol}-${interval}`;
-  const cached = await getCache<any[]>(cacheKey);
+  const cached = await getCache<any>(cacheKey);
   if (cached) return cached;
   return await fetchData(cacheKey, { ...param });
 }
@@ -185,11 +196,11 @@ export function transformSecurities(data:any) {
       .setZone(Intl.DateTimeFormat().resolvedOptions().timeZone)  
       .toFormat(fmt);         
   }
-  const items :Record<string, string> = {}
+  const items :Record<string, number> = {}
   for (const key of Object.keys(target)){
     const k = key.split(' ').pop()
     if(k){
-      items[k] = target[key]
+      items[k] = Number(target[key])
     }
   }
   if (Object.keys(items).length){
@@ -200,7 +211,7 @@ export function transformSecurities(data:any) {
 
 export async function getKlineData(symbol: string, interval:string = '1d') {
   const cacheKey = `kline-${symbol}-${interval}`;
-  const cached = await getCache<any[]>(cacheKey);
+  const cached = await getCache<any>(cacheKey);
   if (cached) return cached;
 
   const functionMap: { [key: string]: string } = {
@@ -264,6 +275,7 @@ export function transformedCryptoCurrencies(data:any){
   }
   return null
 }
+
 export async function getCryptoCurrencies(symbol:string, market:string){
   const cacheKey = `crypto-${symbol}-${market}`;
   const cached = await getCache<any>(cacheKey);

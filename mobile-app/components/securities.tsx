@@ -20,10 +20,18 @@ const MarketListItem = ({ item }:any) => {
             <Text style={styles.itemSymbol}>{item.name}</Text>
           </Link>
         </View>
-          <Text style={[styles.itemPrice,styles.w50, styles.alignRight]}>{item.open?`${item.open}`:''}</Text>
-          <Text style={[styles.itemPrice,styles.w50, styles.alignRight]}>{item.high?`${item.high}`:''}</Text>
-          <Text style={[styles.itemPrice,styles.w50, styles.alignRight]}>{item.low?`${item.low}`:''}</Text>
-          <Text style={[styles.itemPrice,styles.w50, styles.alignRight]}>{item.close?`${item.close}`:''}</Text>
+          <Text style={[styles.itemPrice,styles.w50, styles.alignRight]}>
+            {(item.open && typeof item.open === 'number')?`${item.open.toFixed(2)}`:''}
+          </Text>
+          <Text style={[styles.itemPrice,styles.w50, styles.alignRight]}>
+            {(item.high && typeof item.high === 'number')?`${item.high.toFixed(2)}`:''}
+          </Text>
+          <Text style={[styles.itemPrice,styles.w50, styles.alignRight]}>
+            {(item.low && typeof item.low === 'number')?`${item.low.toFixed(2)}`:''}
+          </Text>
+          <Text style={[styles.itemPrice,styles.w50, styles.alignRight]}>
+            {(item.close && typeof item.close === 'number')?`${item.close.toFixed(2)}`:''}
+          </Text>
           <Text style={[styles.itemPrice,styles.w100, styles.alignRight]}>{item.volume}</Text>
       </View>
     </TouchableOpacity>

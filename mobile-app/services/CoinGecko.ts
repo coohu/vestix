@@ -1,31 +1,35 @@
 import axios from 'axios';
 import { getCache, setCache } from './Cache';
 
-async function getCoinList() {
-    const cacheKey = 'coingecko-coinlist';
-    const cached = await getCache<[string, string][]>(cacheKey);
-    if(cached) {
-        return new Map(cached);
-    }
+const BASE_URL = 'https://api.coingecko.com/api/v3';
+const headers = { 'Accept': 'application/json', 'x-cg-demo-api-key': '<api-key>' };
 
+async function getCoinList() {
+  const cacheKey = 'coingecko-coinlist';
+  const cached = await getCache<[string, string][]>(cacheKey);
+  if(cached) {
+      return new Map(cached);
+  }
   try {
-    const response = await axios.get('https://api.coingecko.com/api/v3/coins/list');
-    const coinList = new Map(response.data.map((c: any) => [c.symbol.toUpperCase(), c.id]));
-    await setCache(cacheKey, Array.from(coinList.entries()));
-    return coinList;
+    const res = await axios.get(`${BASE_URL}/coins/list`, { timeout: 15000, headers });
+    if(res.data && Array.isArray(res.data)){
+      return res.data;
+    }
+    return []
   } catch (error) {
     console.error('Error fetching coin list from CoinGecko:', error);
-    return null;
+    return [];
   }
 }
 
-export async function getMarketData() {
-    const cacheKey = 'coingecko-market-data';
+async function getMarketData() {
+    const cacheKey = 'coingecko';
     const cached = await getCache<any[]>(cacheKey);
     if(cached) return cached;
   try {
     await getCoinList();
-    const response = await axios.get('https://api.coingecko.com/api/v3/coins/markets', {
+    const response = await axios.get(`${BASE_URL}/coins/markets`, {
+      headers,
       params: {
         vs_currency: 'usd',
         order: 'market_cap_desc',
@@ -39,7 +43,6 @@ export async function getMarketData() {
       id: item.id,
       symbol: item.symbol.toUpperCase(),
       name: item.name,
-      category: 'crypto',
       price: item.current_price,
       change: item.price_change_24h,
       changePercent: item.price_change_percentage_24h,
@@ -53,20 +56,17 @@ export async function getMarketData() {
   }
 }
 
-export async function getKlineData(coinId: string, days = '1') {
+async function getKlineData(coinId: string, days = '1') {
     const cacheKey = `coingecko-kline-${coinId}-${days}`;
     const cached = await getCache<any[]>(cacheKey);
     if(cached) return cached;
   try {
-    const response = await axios.get(`https://api.coingecko.com/api/v3/coins/${coinId}/ohlc`, {
+    const response = await axios.get(`${BASE_URL}/coins/${coinId}/ohlc`, {
+      headers,
       params: { vs_currency: 'usd', days: days },
     });
     const results = response.data.map((d: any) => ({
-      time: d[0],
-      open: d[1],
-      high: d[2],
-      low: d[3],
-      close: d[4],
+      time: d[0], open: d[1], high: d[2], low: d[3], close: d[4],
     }));
     await setCache(cacheKey, results);
     return results;
@@ -75,4 +75,5 @@ export async function getKlineData(coinId: string, days = '1') {
     return null;
   }
 }
-export { getCoinList };
+
+export { getCoinList, getMarketData, getKlineData};

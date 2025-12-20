@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 import useAppStore from "@/hooks/use-app-store";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function Index() {
   const { markets, loading, fetchMarketData } = useAppStore();
   useEffect(() => { fetchMarketData('status')  }, [fetchMarketData]);
   return (
-  <View style={styles.container}>
+  <ScrollView>
     {loading.status && <ActivityIndicator size="large" /> }
     {markets.status.length && markets.status?.map((status:any, index:number) =>
       <View style={styles.col} key={index}>
@@ -21,7 +21,7 @@ export default function Index() {
         <Text style={styles.subtitle}>{status.notes}</Text>
       </View>
     )}
-  </View>);
+  </ScrollView>);
 } 
 
 const styles = StyleSheet.create({

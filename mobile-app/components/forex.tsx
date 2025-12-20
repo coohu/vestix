@@ -23,7 +23,7 @@ const MarketListItem = ({ item }:any) => {
           <Text style={[styles.itemPrice,styles.w100, styles.alignRight]}>{item.open?`${item.open}`:''}</Text>
           <Text style={[styles.itemPrice,styles.w100, styles.alignRight]}>{item.high?`${item.high}`:''}</Text>
           <Text style={[styles.itemPrice,styles.w100, styles.alignRight]}>{item.low?`${item.low}`:''}</Text>
-          <Text style={[styles.itemPrice,styles.w100, styles.alignRight]}>{item.close?`${item.close}`:''}</Text>
+          <Text style={[styles.itemPrice,styles.w100, styles.alignRight]}>{item.close?`${item.close.toFixed(5)}`:''}</Text>
           <Text style={[styles.itemPrice,styles.w180, styles.alignRight]}>{item.date}</Text>
       </View>
     </TouchableOpacity>
@@ -33,8 +33,8 @@ const MarketListItem = ({ item }:any) => {
 export default function ForexList ({ category }:{category: MarketCategory}){
   const { markets, loading, fetchMarketData } = useAppStore();
   const data = markets[category];
-  useEffect(() => { fetchMarketData(category)  }, [category, fetchMarketData]);
-  if (loading[category] && data.length === 0) {
+  useEffect(() => { fetchMarketData(category);  }, [category, fetchMarketData]);
+  if (loading[category]) {
     return <ActivityIndicator size="large" style={styles.loader} />;
   }
 

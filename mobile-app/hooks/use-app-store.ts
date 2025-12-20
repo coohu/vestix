@@ -1,7 +1,9 @@
 import { create } from 'zustand';
+import * as Prebid from '@/services/Prebid';
+import * as Tushare from '@/services/Tushare';
 import * as AlphaVantage from '@/services/AlphaVantage';
-import { convertTimeZone } from '@/components/dateTimeFmt';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ProgressBarAndroidBase } from 'react-native';
 
 export type MarketCategory = 'crypto' | 'index' | 'metal' | 'fx' | 'watchlist' | 'status' | 'future' | 'stock';
 
@@ -134,7 +136,6 @@ const useAppStore = create<AppStore>((set, get) => ({
             { symbol: 'SPY', name: 'S&P 500' },
             { symbol: 'QQQ', name: 'NASDAQ 100' },
             { symbol: 'XIU.TRT', name: 'TSX 60' },
-            { symbol: '^N225', name: 'Nikkei 225' },
             { symbol: '000300.SS', name: 'CSI 300' },
           ];
           for (const {symbol, name} of symbols) {
@@ -143,26 +144,12 @@ const useAppStore = create<AppStore>((set, get) => ({
             if( its ){
               data.push({...its, name, symbol})
             }
-            await new Promise(resolve => setTimeout(resolve, 15000));
+            await new Promise(resolve => setTimeout(resolve, 100));
           }
           break;
           
         case 'fx':
-          const pairs = [
-            { from: 'EUR', to: 'USD', name: 'EUR/USD' },
-            { from: 'USD', to: 'JPY', name: 'USD/JPY' },
-            { from: 'USD', to: 'CNY', name: 'USD/CNY' },
-          ];
-          for (const {from, to, name} of pairs){
-            const rates = await AlphaVantage.getForex(
-              {function:'FX_DAILY',from_symbol:from, to_symbol:to, interval:'1d'}
-            );
-            const rts = AlphaVantage.transformedForex(rates);
-            if( rts ){
-              data.push({...rts, name, symbol:`${from}/${to}`})
-            }
-            await new Promise(resolve => setTimeout(resolve, 15000));
-          }
+          data = await Prebid.currencyRates();
           break;
            
         case 'status':
@@ -187,6 +174,8 @@ const useAppStore = create<AppStore>((set, get) => ({
           data = allMarkets.filter((asset) =>
             currentWatchlist.some((item) => item.symbol === asset.symbol)
           );
+          // console.log('--------------------watchlist---------------------')
+          // data = await Tushare.getHS300()
           break;
           
         default:
