@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import * as Sina from '@/services/sinaWeb';
 import * as Prebid from '@/services/Prebid';
 import * as CoinGecko from '@/services/CoinGecko';
 import * as AlphaVantage from '@/services/AlphaVantage';
@@ -156,6 +157,10 @@ const useAppStore = create<AppStore>((set, get) => ({
               data.push({...its, name, symbol})
             }
             await new Promise(resolve => setTimeout(resolve, 100));
+          }
+          const chindex = await Sina.cnIdx()
+          if(chindex){
+            data = [...data, ...chindex]
           }
           break;
           

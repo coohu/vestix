@@ -1,6 +1,6 @@
 import { stock } from 'tushare';
 import { getCache, setCache } from './Cache';
-
+const token = '3dcd6ebb3cbadc3c6162d8e9a211dec89929549aff2312c22f970581'
 export async function getHS300() : Promise<any[]> {
     const cacheKey = `tushare-HS300`;
     const d = getCache<any>(cacheKey, 10000*60*60*4)

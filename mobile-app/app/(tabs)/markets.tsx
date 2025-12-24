@@ -1,7 +1,7 @@
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import SearchComponent from '../../components/SearchComponent';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import SecuritiesList from '@/components/securities';
+import SecuritiesList from '@/components/securities-list';
 import CryptoList from '@/components/crypto-list';
 import WatchList from '@/components/watchlist';
 import FutureList from '@/components/future';

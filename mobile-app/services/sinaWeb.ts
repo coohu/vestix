@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as iconv from 'iconv-lite';
+import { getCache, setCache } from './Cache';
 
 type Indices = {
   symbol:string;
@@ -173,4 +174,44 @@ if (require.main === module) {
   fetchGlobalFutures().then(data => {
     console.table(data, ['symbol', 'name', 'last', 'open', 'high', 'low', 'date']);
   });
+}
+
+export async function cnIdx () {
+  const cacheKey = 'sina-cn-index'
+  const data = await getCache<any[]>(cacheKey , 1000*60*5)
+  if(data && data.length) return data
+
+  const url = 'https://vip.stock.finance.sina.com.cn'
+  try{
+    const res = await axios.get(`${url}/quotes_service/api/json_v2.php/Market_Center.getHQNodeDataSimple`, {
+      headers:{
+        'Referer': 'https://vip.stock.finance.sina.com.cn/mkt/' ,
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': '*/*',
+        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+      },
+      params:{page:1, num:40, sort:'symbol', asc:1, node:'dpzs', _s_r_a:'init'},
+    })
+    if(Array.isArray(res.data) && res.data.length){
+      const data = res.data.map((it:any) => 
+        ({ 
+          ...(it.name && {name: it.name}),
+          ...(it.symbol && {symbol: it.symbol}),
+          ...(it.pricechange && {gain: parseFloat(it.pricechange) }),
+          ...(it.changepercent && {percent:  parseFloat(it.changepercent)}),
+          ...(it.settlement && {close:  parseFloat(it.settlement)}),
+          ...(it.open && {open:  parseFloat(it.open)}),
+          ...(it.high && {high:  parseFloat(it.high)}),
+          ...(it.low && {low:  parseFloat(it.low)}),
+          ...(it.volume && {volume: it.volume}),
+          ...(it.amount && {amount: it.amount})
+        }));
+      setCache(cacheKey, data)
+      return data
+    }
+    return null
+  } catch (e:any) {
+    console.log(e)
+    return null
+  }
 }
