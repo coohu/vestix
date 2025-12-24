@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { getCache, setCache } from './Cache';
 
-const BASE_URL = 'https://api.coingecko.com/api/v3';
-const headers = { 'Accept': 'application/json', 'x-cg-demo-api-key': '<api-key>' };
+const BASE_URL = 'http://apij38sdhff.aivon.top' // 'https://api.coingecko.com/api/v3';
+const headers = { 'Accept': 'application/json', 'x-cg-demo-api-key': 'CG-5MWFTWcgzTYTZxcXxYBJjzdr' };
 
 async function getCoinList() {
   const cacheKey = 'coingecko-coinlist';
@@ -57,9 +57,9 @@ async function getMarketData() {
 }
 
 async function getKlineData(coinId: string, days = '1') {
-    const cacheKey = `coingecko-kline-${coinId}-${days}`;
-    const cached = await getCache<any[]>(cacheKey);
-    if(cached) return cached;
+  const cacheKey = `coingecko-kline-${coinId}-${days}`;
+  const cached = await getCache<any[]>(cacheKey);
+  if(cached) return cached;
   try {
     const response = await axios.get(`${BASE_URL}/coins/${coinId}/ohlc`, {
       headers,
@@ -76,4 +76,24 @@ async function getKlineData(coinId: string, days = '1') {
   }
 }
 
-export { getCoinList, getMarketData, getKlineData};
+async function symbols2price(ss:string[]){
+  const cacheKey = `coingecko-price`;
+  const cached = await getCache<any>(cacheKey ,1000*60*60*8);
+  if( cached ) return cached;
+  try {
+    const symbols = ss.join(',')
+    const res = await axios.get(`${BASE_URL}/simple/price`, {
+      headers,
+      params: { vs_currencies: 'usd', symbols},
+    });
+    if(res.data && Object.keys(res.data).length){
+      return res.data;
+    }
+    return null
+  } catch (error) {
+    console.error(`Error fetching symbols2price from CoinGecko:`, error);
+    return null
+  }
+}
+
+export { getCoinList, getMarketData, getKlineData, symbols2price};

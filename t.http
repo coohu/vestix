@@ -1,0 +1,50 @@
+###
+GET http://hq.sinajs.cn/list=s_sh000001,s_sz399001,s_sh000300,s_bj899050,s_sz399006
+Referer: 'https://finance.sina.com.cn/futuremarket/',
+User-Agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+
+###
+GET http://hq.sinajs.cn/list=hkHSI,b_NKY,b_TWSE,b_AS30,b_FSSTI
+Referer: 'https://finance.sina.com.cn/futuremarket/',
+User-Agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+
+###
+GET http://hq.sinajs.cn/list=gb_dji,gb_ixic,gb_inx,hf_DJS,hf_NAS
+Referer: 'https://finance.sina.com.cn/futuremarket/',
+User-Agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+
+###
+GET http://hq.sinajs.cn/list=b_UKX,b_DAX,b_CAC,b_FTSEMIB
+Referer: 'https://finance.sina.com.cn/futuremarket/',
+User-Agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+
+###
+GET http://hq.sinajs.cn/list=hf_GC,hf_CL,hf_S,hf_CAD,hf_SI,DINIW
+Referer: 'https://finance.sina.com.cn/futuremarket/',
+User-Agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+
+###
+GET http://hq.sinajs.cn/list=DINIW
+Referer: 'https://finance.sina.com.cn/futuremarket/',
+User-Agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+###
+GET http://apij38sdhff.aivon.top/coins/list
+Content-Type: application/json
+x-cg-demo-api-key: <api-key>
+###
+GET http://apij38sdhff.aivon.top/simple/price?vs_currencies=usd&symbols=btc,eth,bnb
+Content-Type: application/json
+x-cg-demo-api-key: CG-5MWFTWcgzTYTZxcXxYBJjzdr
+
+{
+  "btc": {
+    "usd": 87896
+  },
+  "eth": {
+    "usd": 2978.96
+  },
+  "bnb": {
+    "usd": 854.57
+  }
+}
+###

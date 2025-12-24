@@ -1,9 +1,8 @@
 import { create } from 'zustand';
 import * as Prebid from '@/services/Prebid';
-import * as Tushare from '@/services/Tushare';
+import * as CoinGecko from '@/services/CoinGecko';
 import * as AlphaVantage from '@/services/AlphaVantage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ProgressBarAndroidBase } from 'react-native';
 
 export type MarketCategory = 'crypto' | 'index' | 'metal' | 'fx' | 'watchlist' | 'status' | 'future' | 'stock';
 
@@ -118,16 +117,28 @@ const useAppStore = create<AppStore>((set, get) => ({
       switch (category) {
         case 'crypto':
           const tkPairs = [
-            { from: 'BTC', to: 'USD', name: 'BTC/USD' },
-            { from: 'ETH', to: 'USD', name: 'ETH/USD' },
+            { from: 'BTC', to: 'USD'},
+            { from: 'ETH', to: 'USD'},
+            { from: 'USDT', to: 'USD'},
+            { from: 'BNB', to: 'USD'},
+            { from: 'XRP', to: 'USD'},
+            { from: 'USDC', to: 'USD'},
+            { from: 'SOL', to: 'USD'},
+            { from: 'TRX', to: 'USD'},
+            { from: 'STETH', to: 'USD'},
+            { from: 'DOGE', to: 'USD'},
+            { from: 'FIGR_HELOC', to: 'USD'},
+            { from: 'ADA', to: 'USD'},
           ];
-          for(const {from, to, name} of tkPairs){
-            const currs = await AlphaVantage.getCryptoCurrencies(from, to);
-            const transformed = AlphaVantage.transformedCryptoCurrencies(currs);
-            if(transformed){
-              data.push({...transformed, name, symbol:`${from}/${to}`})
+          const ss = tkPairs.map(it=>it.from)
+          const currs = await CoinGecko.symbols2price(ss);
+          for(const {from, to} of tkPairs){
+            const name = `${from}/${to}`
+            const s=from.trim().toLowerCase()
+            const c=to.trim().toLowerCase()
+            if(currs[s] && currs[s][c]){
+              data.push({name, symbol:name, price:currs[s][c]})
             }
-            await new Promise(resolve => setTimeout(resolve, 15000));
           }
           break;
 

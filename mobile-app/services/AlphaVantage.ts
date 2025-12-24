@@ -211,7 +211,7 @@ export function transformSecurities(data:any) {
 
 export async function getKlineData(symbol: string, interval:string = '1d') {
   const cacheKey = `kline-${symbol}-${interval}`;
-  const cached = await getCache<any>(cacheKey);
+  const cached = await getCache<any>(cacheKey, 1000*60*60*8);
   if (cached) return cached;
 
   const functionMap: { [key: string]: string } = {

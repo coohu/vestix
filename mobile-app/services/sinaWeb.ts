@@ -1,22 +1,28 @@
 import axios from 'axios';
 import * as iconv from 'iconv-lite';
 
-export interface GlobalFuturesData {
-  symbol: string;    // 代码 (如 CAD)
-  name: string;      // 中文名 (如 伦铜)
-  last: number;      // 最新价
-  changeAmount: number; // 涨跌额
-  bid: number;       // 买入价
-  ask: number;       // 卖出价
-  high: number;      // 最高价
-  low: number;       // 最低价
-  time: string;      // 时间 (HH:mm:ss)
-  close: number;     // 昨收
-  open: number;      // 今开
-  date: string;      // 日期 (yyyy-MM-dd)
-  nameInApi: string; // 接口返回的名称
+type Indices = {
+  symbol:string;
+  name:string;
+  last?:number;
+  gain?:number;
+  percent?:number;
+  close?:number;
+  open?:number;
+  high?:number;
+  low?:number;
+  volume?:number;
+  amount?:number;
+  date?:string;
+  bid?:number;
+  ask?:number;
 }
 
+const BASE_URL = `http://hq.sinajs.cn/list=`;
+const headers = {
+  'Referer': 'https://finance.sina.com.cn/',
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+}
 async function fetchGlobalFutures() {
   const CURRENT_FUTURES: Record<string, string> = {
     "CAD": "伦铜",
@@ -33,25 +39,21 @@ async function fetchGlobalFutures() {
   // 1. 构造请求 URL，国际期货必须加 hf_ 前缀
   const symbols = Object.keys(CURRENT_FUTURES);
   const listParam = symbols.map(s => `hf_${s}`).join(',');
-  const url = `http://hq.sinajs.cn/list=${listParam}`;
-
   try {
-    const response = await axios.get(url, {
+    const response = await axios.get(`${BASE_URL}${listParam}`, {
       responseType: 'arraybuffer',
-      headers: {
-        'Referer': 'https://finance.sina.com.cn/futuremarket/',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-      }
+      headers,
     });
 
     const text = iconv.decode(Buffer.from(response.data), 'gbk');
     const lines = text.split('\n');
-    const results: GlobalFuturesData[] = [];
+    const results: Indices[] = [];
 
-    lines.forEach(line => {
+    lines.forEach((line:any) => {
       // 匹配示例: var hq_str_hf_CL="71.50,0.25,71.49,71.51,72.10,71.10,10:30:05,71.25,71.30,...";
       const match = line.match(/var hq_str_hf_(\w+)="(.+)";/);
       if (match) {
+        console.log(match)
         const symbol = match[1];
         const dataStr = match[2];
         const f = dataStr.split(',');
@@ -62,16 +64,14 @@ async function fetchGlobalFutures() {
           symbol: symbol,
           name: CURRENT_FUTURES[symbol] || f[13],
           last: parseFloat(f[0]),
-          changeAmount: parseFloat(f[1]),
+          gain: parseFloat(f[1]),
           bid: parseFloat(f[2]),
           ask: parseFloat(f[3]),
           high: parseFloat(f[4]),
           low: parseFloat(f[5]),
-          time: f[6],
-          prevClose: parseFloat(f[7]),
+          close: parseFloat(f[7]),
           open: parseFloat(f[8]),
           date: f[12],
-          nameInApi: f[13]
         });
       }
     });
@@ -83,45 +83,26 @@ async function fetchGlobalFutures() {
   }
 }
 
-
-export interface AgtdMarketData {
-  symbol: string;        // 最终生效的代码
-  name: string;          // 名称
-  last: number;          // 最新价
-  open: number;          // 开盘价
-  close: number;     // 昨收
-  high: number;          // 最高
-  low: number;           // 最低
-  volume: number;        // 成交量
-  amount: number;        // 成交额
-  date: string;          // 日期
-  pct: string;           // 增长率
-}
-
-export async function fetchAgtdData(): Promise<AgtdMarketData[]> {
+export async function fetchAgtdData(): Promise<Indices[]> {
   const CURRENT_FUTURES: Record<string, string> = {
     "SGE_AGTD": "白银T+D",
     "SGE_AUTD": "黄金T+D",
   };
   const listParam = Object.keys(CURRENT_FUTURES).join(',');
-  const URL = `http://hq.sinajs.cn/list=${listParam}`;
   try {
-    const response = await axios.get(URL, {
+    const response = await axios.get(`${BASE_URL}${listParam}`, {
       responseType: 'arraybuffer',
-      headers: {
-        // 使用通用的新浪财经 Referer，避免被期货频道限制
-        'Referer': 'https://finance.sina.com.cn/',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-      }
+      headers,
     });
 
     const text = iconv.decode(Buffer.from(response.data), 'gbk');
     const lines = text.split('\n');
-    const result: AgtdMarketData[] = [];
+    const result: Indices[] = [];
     for (const line of lines) {
       // 匹配 var hq_str_CODE="DATA";
       const match = line.match(/var hq_str_(\w+)="(.+)";/);
       if (match && match[2].length > 5) { // 确保数据长度足够（不是空字符串）
+        console.log(match )
         const symbol = match[1];
         const rawData = match[2];
         const f = rawData.split(',');
@@ -139,7 +120,7 @@ export async function fetchAgtdData(): Promise<AgtdMarketData[]> {
             volume: parseFloat(f[10]) || 0, // 成交量 (位置可能变动，暂取常见位)
             amount: parseFloat(f[11]) || 0, // 成交额
             date: f[16] || new Date().toISOString().split('T')[0],
-            pct: f[17] || '',
+            percent: f[17] || '',
           })
       }
     }
@@ -149,6 +130,38 @@ export async function fetchAgtdData(): Promise<AgtdMarketData[]> {
     return [];
   }
 }
+
+export async function indices(){
+  const syl = ['s_sh000001', 's_sz399001', 's_sh000300', 's_bj899050', 's_sz399006']
+  const result: Indices[] = [];
+  try{
+    for (const s of syl) {
+      const res = await axios.get(`${URL}${syl.join(',')}`, {responseType: 'arraybuffer', headers})
+      const text = iconv.decode(Buffer.from(res.data), 'gbk');
+      const lines = text.split('\n');
+      for (const line of lines) {
+        const match = line.match(/var hq_str_s_(\w+)="(.+)";/);
+        if (match && match[2].length > 5) {
+          const symbol = match[1];
+          const rawData = match[2];
+          const f = rawData.split(',');
+          console.log( match[1], f,'------------')
+          result.push({
+            symbol: symbol,
+            name: f[0], 
+            last: parseFloat(f[1]), 
+            volume: parseFloat(f[4]),
+            amount: parseFloat(f[5]), 
+            percent: f[4],
+          })
+        }
+      }
+    }
+  } catch (e:any){
+    console.log(e)
+  }
+}
+
 
 if (require.main === module) {
   fetchAgtdData().then(data => {
