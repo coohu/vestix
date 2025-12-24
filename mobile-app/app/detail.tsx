@@ -2,8 +2,8 @@ import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-g
 import { View, Text, StyleSheet, ActivityIndicator, Dimensions } from 'react-native';
 import { Canvas, Path, Skia } from '@shopify/react-native-skia';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useSharedValue } from 'react-native-reanimated';
 import React, { useEffect, useMemo, useState } from 'react';
+import { useSharedValue } from 'react-native-reanimated';
 import { useLocalSearchParams } from 'expo-router';
 import { runOnJS } from 'react-native-reanimated';
 import Constants from 'expo-constants';
