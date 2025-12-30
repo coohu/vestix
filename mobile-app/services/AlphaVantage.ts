@@ -4,7 +4,7 @@ import { getCache, setCache } from './Cache';
 
 const BASE_URL = 'https://www.alphavantage.co/query';
 const API_KEY = 'JO90E8HQ3QGVRJ98';
-const MIN_INTERVAL = 1100
+const MIN_INTERVAL = 3000
 let lastScheduledTime = 0
 
 export async function fetchData(cacheKey: string, params: any) {

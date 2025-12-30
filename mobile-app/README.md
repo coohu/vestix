@@ -63,6 +63,7 @@ Join our community of developers creating universal apps.
    eas login
    eas build:configure
    eas build --platform android --profile production
+   eas build --platform android --profile preview --output="./vestix.apk"
    npx expo install expo-image-picker
    npx expo install @expo/config-plugins@6.0.0 # 确保版本兼容
    npx expo-optimize # 优化图片

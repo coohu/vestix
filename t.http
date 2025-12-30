@@ -1,28 +1,63 @@
 ###
+GET https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=SH000001&apikey=JO90E8HQ3QGVRJ98
+###
+GET https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=sh&apikey=JO90E8HQ3QGVRJ98
+###
+###
+GET https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=sh&apikey=JO90E8HQ3QGVRJ98
+###
+###
+GET https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=sh&apikey=JO90E8HQ3QGVRJ98
+###
 GET http://hq.sinajs.cn/list=s_sh000001,s_sz399001,s_sh000300,s_bj899050,s_sz399006
 Referer: 'https://finance.sina.com.cn/futuremarket/',
 User-Agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-
+###
+var hq_str_s_sh000001="上证指数,3940.9470,20.9684,0.53,4748964,77392862";
+var hq_str_s_sz399001="深证成指,13486.42,117.430,0.88,640440440,110633962";
+var hq_str_s_sh000300="沪深300,4634.0586,13.3245,0.29,1537112,40637564";
+var hq_str_s_bj899050="北证50,1445.547,5.605,0.389,797346649,17112753724.000";
+var hq_str_s_sz399006="创业板指,3229.58,24.566,0.77,26460457,17150755";
 ###
 GET http://hq.sinajs.cn/list=hkHSI,b_NKY,b_TWSE,b_AS30,b_FSSTI
 Referer: 'https://finance.sina.com.cn/futuremarket/',
 User-Agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-
+###
+var hq_str_hkHSI="HSI,恒生指数,25780.090,25774.141,25890.870,25772.870,25818.930,44.789,0.174,0.00000,0.00000,92524183,6314625196,0.000,0.000,27381.840,18671.490,2025/12/24,12:08";
+var hq_str_b_NKY="日经225指数,50344.1016,-68.77,-0.14,2:12 AM,14:12:00,2025-12-24,14:30:00,50475.4805,50412.8700,50636.9492,50323.9219,0";
+var hq_str_b_TWSE="台湾台北指数,25580.32,-443.53,-1.70,9/26/2025,2025-09-26";
+var hq_str_b_AS30="澳交所普通股指数 ,7887.10,17.50,0.22,02:57:43,14:57:43";
+var hq_str_b_FSSTI="富时新加坡海峡时报指数,4277.36,11.38,0.27,2:12 AM,14:12:00";
 ###
 GET http://hq.sinajs.cn/list=gb_dji,gb_ixic,gb_inx,hf_DJS,hf_NAS
 Referer: 'https://finance.sina.com.cn/futuremarket/',
 User-Agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-
+###
+var hq_str_gb_dji="道琼斯,48442.4102,0.16,2025-12-24 05:52:24,79.7300,48320.5898,48527.5000,48254.3086,48886.8594,36611.7812,418928995,569038974,0,0.00,--,0.00,0.00,0.00,0.00,0,0,0.0000,0.00,0.0000,,Dec 23 04:52PM EST,48362.6797,0,1,2025";
+var hq_str_gb_ixic="纳斯达克,23561.8443,0.57,2025-12-24 06:30:00,133.0151,23407.6952,23563.4618,23377.4861,24019.9941,14784.0312,6740609493,6652663425,0,0.00,--,0.00,0.00,0.00,0.00,0,0,0.0000,0.00,0.00,,Dec 23 05:16PM EST,23428.8292,0,1,2025,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000";
+var hq_str_gb_inx="标普500指数,6909.7900,0.46,2025-12-24 05:52:24,31.3000,6872.4102,6910.8799,6868.8101,6920.3398,4835.0400,2232658694,3470610859,0,0.00,--,0.00,0.00,0.00,0.00,0,0,0.0000,0.00,0.0000,,Dec 23 04:52PM EST,6878.4902,0,1,2025";
+var hq_str_hf_DJS="";
+var hq_str_hf_NAS="";
 ###
 GET http://hq.sinajs.cn/list=b_UKX,b_DAX,b_CAC,b_FTSEMIB
 Referer: 'https://finance.sina.com.cn/futuremarket/',
 User-Agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-
+###
+var hq_str_b_UKX="富时100指数,9889.2200,23.25,0.24,9/26/2025,2025-09-26,2025-12-24,00:35:30,9865.9400,9865.9700,9901.4800,9846.2900,0";
+var hq_str_b_DAX="德国DAX指数,24340.0600,56.09,0.23,9/26/2025,2025-09-26,2025-12-24,00:29:55,24297.6200,24283.9700,24362.0100,24257.4700,28297803";
+var hq_str_b_CAC="法国CAC40指数,8103.8500,-17.22,-0.21,9/26/2025,2025-09-26,2025-12-24,00:35:30,8120.0800,8121.0700,8127.0700,8088.4100,0";
+var hq_str_b_FTSEMIB="富时意大利MIB指数,44606.5800,12.98,0.03,9/26/2025,2025-09-26,2025-12-24,00:35:27,44552.0800,44593.6000,44724.2100,44456.5900,0";
 ###
 GET http://hq.sinajs.cn/list=hf_GC,hf_CL,hf_S,hf_CAD,hf_SI,DINIW
 Referer: 'https://finance.sina.com.cn/futuremarket/',
 User-Agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-
+###
+var hq_str_hf_GC="4509.761,,4511.200,4511.600,4555.100,4496.500,16:14:57,4505.700,4516.700,0,1,3,2025-12-24,纽约黄金,0";
+var hq_str_hf_CL="58.684,,58.670,58.690,58.720,58.220,16:15:01,58.380,58.470,0,16,15,2025-12-24,纽约原油,0";
+var hq_str_hf_S="1068.860,,1068.500,1068.750,1069.750,1063.000,16:14:57,1063.750,1063.500,0,10,40,2025-12-24,美国大豆,0";
+var hq_str_hf_CAD="12208.130,,12197.500,12200.000,12282.000,12058.000,16:15:01,12060.500,12121.500,0,3,2,2025-12-24,伦铜,7889";
+var hq_str_hf_SI="71.794,,71.815,71.830,72.750,71.480,16:15:02,71.137,71.680,0,1,2,2025-12-24,纽约白银,0";
+var hq_str_DINIW="16:15:00,97.9401,97.9401,97.9508,2168,97.9550,97.9619,97.7451,97.9401,美元指数,2025-12-24";
 ###
 GET http://hq.sinajs.cn/list=DINIW
 Referer: 'https://finance.sina.com.cn/futuremarket/',
@@ -48,3 +83,448 @@ x-cg-demo-api-key: CG-5MWFTWcgzTYTZxcXxYBJjzdr
   }
 }
 ###
+
+###
+GET https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=MCHI&apikey=3dcd6ebb3cbadc3c6162d8e9a211dec89929549aff2312c22f970581
+
+###
+GET https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeDataSimple?page=1&num=100&sort=symbol&asc=1&node=hs_s&_s_r_a=auto
+Referer:  https://vip.stock.finance.sina.com.cn/mkt/
+User-Agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+###
+GET https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeDataSimple?page=1&num=40&sort=symbol&asc=1&node=dpzs&_s_r_a=init
+Referer:  https://vip.stock.finance.sina.com.cn/mkt/
+User-Agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+authority: vip.stock.finance.sina.com.cn
+
+###
+[
+  {
+    "symbol": "bj899050",
+    "name": "\u5317\u8bc150",
+    "trade": "1445.547",
+    "pricechange": "5.605",
+    "changepercent": "0.389",
+    "buy": "0.000",
+    "sell": "0.000",
+    "settlement": "1439.942",
+    "open": "1434.257",
+    "high": "1447.900",
+    "low": "1428.932",
+    "volume": 797346649,
+    "amount": 17112753724,
+    "code": "899050",
+    "ticktime": "15:30:01"
+  },
+  {
+    "symbol": "sh000001",
+    "name": "\u4e0a\u8bc1\u6307\u6570",
+    "trade": "3940.9470",
+    "pricechange": "20.968",
+    "changepercent": "0.535",
+    "buy": "0",
+    "sell": "0",
+    "settlement": "3919.9786",
+    "open": "3920.3466",
+    "high": "3947.0408",
+    "low": "3912.3107",
+    "volume": 474896447,
+    "amount": 773928624468,
+    "code": "000001",
+    "ticktime": "15:30:39"
+  },
+  {
+    "symbol": "sh000002",
+    "name": "\uff21\u80a1\u6307\u6570",
+    "trade": "4131.9506",
+    "pricechange": "21.974",
+    "changepercent": "0.535",
+    "buy": "0",
+    "sell": "0",
+    "settlement": "4109.9762",
+    "open": "4110.3684",
+    "high": "4138.3433",
+    "low": "4101.8787",
+    "volume": 474659995,
+    "amount": 773607249641,
+    "code": "000002",
+    "ticktime": "15:35:37"
+  },
+  {
+    "symbol": "sh000003",
+    "name": "\uff22\u80a1\u6307\u6570",
+    "trade": "250.7466",
+    "pricechange": "1.580",
+    "changepercent": "0.634",
+    "buy": "0",
+    "sell": "0",
+    "settlement": "249.1664",
+    "open": "249.1107",
+    "high": "250.8873",
+    "low": "248.8610",
+    "volume": 196704,
+    "amount": 86438975,
+    "code": "000003",
+    "ticktime": "15:35:37"
+  },
+  {
+    "symbol": "sh000008",
+    "name": "\u7efc\u5408\u6307\u6570",
+    "trade": "3622.6415",
+    "pricechange": "-5.183",
+    "changepercent": "-0.143",
+    "buy": "0",
+    "sell": "0",
+    "settlement": "3627.8248",
+    "open": "3623.6705",
+    "high": "3632.4617",
+    "low": "3610.3951",
+    "volume": 88156666,
+    "amount": 98237267318,
+    "code": "000008",
+    "ticktime": "15:35:37"
+  },
+  {
+    "symbol": "sh000009",
+    "name": "\u4e0a\u8bc1380",
+    "trade": "6495.7763",
+    "pricechange": "76.976",
+    "changepercent": "1.199",
+    "buy": "0",
+    "sell": "0",
+    "settlement": "6418.8000",
+    "open": "6414.3535",
+    "high": "6500.1719",
+    "low": "6404.2334",
+    "volume": 95975406,
+    "amount": 186209474034,
+    "code": "000009",
+    "ticktime": "15:35:37"
+  },
+  {
+    "symbol": "sh000010",
+    "name": "\u4e0a\u8bc1180",
+    "trade": "9995.9053",
+    "pricechange": "29.420",
+    "changepercent": "0.295",
+    "buy": "0",
+    "sell": "0",
+    "settlement": "9966.4851",
+    "open": "9975.9294",
+    "high": "10011.3963",
+    "low": "9929.8800",
+    "volume": 92034953,
+    "amount": 201701418400,
+    "code": "000010",
+    "ticktime": "15:35:37"
+  },
+  {
+    "symbol": "sh000011",
+    "name": "\u57fa\u91d1\u6307\u6570",
+    "trade": "7136.5672",
+    "pricechange": "6.128",
+    "changepercent": "0.086",
+    "buy": "0",
+    "sell": "0",
+    "settlement": "7130.4397",
+    "open": "7130.6279",
+    "high": "7137.5968",
+    "low": "7128.5826",
+    "volume": 909873906,
+    "amount": 319435995268,
+    "code": "000011",
+    "ticktime": "15:35:37"
+  },
+  {
+    "symbol": "sh000012",
+    "name": "\u56fd\u503a\u6307\u6570",
+    "trade": "224.7939",
+    "pricechange": "0.012",
+    "changepercent": "0.005",
+    "buy": "0",
+    "sell": "0",
+    "settlement": "224.7821",
+    "open": "224.7967",
+    "high": "224.8265",
+    "low": "224.7278",
+    "volume": 27327557,
+    "amount": 27273804030,
+    "code": "000012",
+    "ticktime": "15:35:37"
+  },
+  {
+    "symbol": "sh000016",
+    "name": "\u4e0a\u8bc150",
+    "trade": "3025.1839",
+    "pricechange": "-2.336",
+    "changepercent": "-0.077",
+    "buy": "0",
+    "sell": "0",
+    "settlement": "3027.5195",
+    "open": "3028.3742",
+    "high": "3032.0100",
+    "low": "3012.1990",
+    "volume": 31799441,
+    "amount": 91264188766,
+    "code": "000016",
+    "ticktime": "15:35:37"
+  },
+  {
+    "symbol": "sh000017",
+    "name": "\u65b0\u7efc\u6307",
+    "trade": "3331.2269",
+    "pricechange": "17.720",
+    "changepercent": "0.535",
+    "buy": "0",
+    "sell": "0",
+    "settlement": "3313.5073",
+    "open": "3313.8188",
+    "high": "3336.3846",
+    "low": "3307.0098",
+    "volume": 467842431,
+    "amount": 753456061680,
+    "code": "000017",
+    "ticktime": "15:35:37"
+  },
+  {
+    "symbol": "sh000300",
+    "name": "\u6caa\u6df1300",
+    "trade": "4634.0586",
+    "pricechange": "13.325",
+    "changepercent": "0.288",
+    "buy": "0",
+    "sell": "0",
+    "settlement": "4620.7341",
+    "open": "4623.6831",
+    "high": "4639.4278",
+    "low": "4602.1444",
+    "volume": 153711241,
+    "amount": 406375640662,
+    "code": "000300",
+    "ticktime": "15:35:25"
+  },
+  {
+    "symbol": "sz399001",
+    "name": "\u6df1\u8bc1\u6210\u6307",
+    "trade": "13486.419",
+    "pricechange": "117.430",
+    "changepercent": "0.878",
+    "buy": "0.000",
+    "sell": "0.000",
+    "settlement": "13368.989",
+    "open": "13378.482",
+    "high": "13497.099",
+    "low": "13347.763",
+    "volume": 64044044005,
+    "amount": 1106339627477,
+    "code": "399001",
+    "ticktime": "15:00:03"
+  },
+  {
+    "symbol": "sz399002",
+    "name": "\u6df1\u6210\u6307R",
+    "trade": "18104.252",
+    "pricechange": "157.981",
+    "changepercent": "0.880",
+    "buy": "0.000",
+    "sell": "0.000",
+    "settlement": "17946.271",
+    "open": "17959.357",
+    "high": "18118.588",
+    "low": "17918.119",
+    "volume": 18474238522,
+    "amount": 507030310971,
+    "code": "399002",
+    "ticktime": "15:00:03"
+  },
+  {
+    "symbol": "sz399003",
+    "name": "\u6210\u4efd\uff22\u6307",
+    "trade": "8234.869",
+    "pricechange": "-9.808",
+    "changepercent": "-0.119",
+    "buy": "0.000",
+    "sell": "0.000",
+    "settlement": "8244.677",
+    "open": "8255.837",
+    "high": "8255.837",
+    "low": "8190.171",
+    "volume": 8297754,
+    "amount": 43321750,
+    "code": "399003",
+    "ticktime": "15:00:03"
+  },
+  {
+    "symbol": "sz399004",
+    "name": "\u6df1\u8bc1100R",
+    "trade": "8334.137",
+    "pricechange": "25.730",
+    "changepercent": "0.310",
+    "buy": "0.000",
+    "sell": "0.000",
+    "settlement": "8308.407",
+    "open": "8312.817",
+    "high": "8338.470",
+    "low": "8260.816",
+    "volume": 4487456265,
+    "amount": 183535426755,
+    "code": "399004",
+    "ticktime": "15:00:03"
+  },
+  {
+    "symbol": "sz399005",
+    "name": "\u4e2d\u5c0f100",
+    "trade": "8182.514",
+    "pricechange": "70.604",
+    "changepercent": "0.870",
+    "buy": "0.000",
+    "sell": "0.000",
+    "settlement": "8111.910",
+    "open": "8119.565",
+    "high": "8191.391",
+    "low": "8099.184",
+    "volume": 4264272758,
+    "amount": 116997376187,
+    "code": "399005",
+    "ticktime": "15:00:03"
+  },
+  {
+    "symbol": "sz399006",
+    "name": "\u521b\u4e1a\u677f\u6307",
+    "trade": "3229.577",
+    "pricechange": "24.566",
+    "changepercent": "0.766",
+    "buy": "0.000",
+    "sell": "0.000",
+    "settlement": "3205.011",
+    "open": "3207.409",
+    "high": "3234.999",
+    "low": "3193.967",
+    "volume": 18267504994,
+    "amount": 502569104723,
+    "code": "399006",
+    "ticktime": "15:00:03"
+  },
+  {
+    "symbol": "sz399100",
+    "name": "\u65b0\u6307\u6570",
+    "trade": "11888.443",
+    "pricechange": "122.457",
+    "changepercent": "1.041",
+    "buy": "0.000",
+    "sell": "0.000",
+    "settlement": "11765.986",
+    "open": "11766.675",
+    "high": "11896.855",
+    "low": "11749.855",
+    "volume": 62505917304,
+    "amount": 1095963125970,
+    "code": "399100",
+    "ticktime": "15:00:03"
+  },
+  {
+    "symbol": "sz399101",
+    "name": "\u4e2d\u5c0f\u7efc\u6307",
+    "trade": "14415.357",
+    "pricechange": "164.976",
+    "changepercent": "1.158",
+    "buy": "0.000",
+    "sell": "0.000",
+    "settlement": "14250.381",
+    "open": "14257.351",
+    "high": "14423.672",
+    "low": "14239.736",
+    "volume": 27295127179,
+    "amount": 399253346804,
+    "code": "399101",
+    "ticktime": "15:00:03"
+  },
+  {
+    "symbol": "sz399106",
+    "name": "\u6df1\u8bc1\u7efc\u6307",
+    "trade": "2517.983",
+    "pricechange": "25.873",
+    "changepercent": "1.038",
+    "buy": "0.000",
+    "sell": "0.000",
+    "settlement": "2492.110",
+    "open": "2492.266",
+    "high": "2519.865",
+    "low": "2488.894",
+    "volume": 64044044005,
+    "amount": 1106339627477,
+    "code": "399106",
+    "ticktime": "15:00:03"
+  },
+  {
+    "symbol": "sz399107",
+    "name": "\u6df1\u8bc1\uff21\u6307",
+    "trade": "2634.556",
+    "pricechange": "27.100",
+    "changepercent": "1.039",
+    "buy": "0.000",
+    "sell": "0.000",
+    "settlement": "2607.456",
+    "open": "2607.616",
+    "high": "2636.536",
+    "low": "2604.088",
+    "volume": 64030264758,
+    "amount": 1106286817177,
+    "code": "399107",
+    "ticktime": "15:00:03"
+  },
+  {
+    "symbol": "sz399108",
+    "name": "\u6df1\u8bc1\uff22\u6307",
+    "trade": "1256.490",
+    "pricechange": "-0.745",
+    "changepercent": "-0.059",
+    "buy": "0.000",
+    "sell": "0.000",
+    "settlement": "1257.235",
+    "open": "1258.613",
+    "high": "1258.613",
+    "low": "1251.109",
+    "volume": 13779247,
+    "amount": 52810300,
+    "code": "399108",
+    "ticktime": "15:00:03"
+  },
+  {
+    "symbol": "sz399333",
+    "name": "\u4e2d\u5c0f100R",
+    "trade": "9985.631",
+    "pricechange": "86.162",
+    "changepercent": "0.870",
+    "buy": "0.000",
+    "sell": "0.000",
+    "settlement": "9899.469",
+    "open": "9908.811",
+    "high": "9996.465",
+    "low": "9883.938",
+    "volume": 4264272758,
+    "amount": 116997376187,
+    "code": "399333",
+    "ticktime": "15:00:03"
+  },
+  {
+    "symbol": "sz399606",
+    "name": "\u521b\u4e1a\u677fR",
+    "trade": "3580.339",
+    "pricechange": "27.234",
+    "changepercent": "0.766",
+    "buy": "0.000",
+    "sell": "0.000",
+    "settlement": "3553.105",
+    "open": "3555.764",
+    "high": "3586.349",
+    "low": "3540.862",
+    "volume": 2646045706,
+    "amount": 171507559616,
+    "code": "399606",
+    "ticktime": "15:00:03"
+  }
+]
+###
+
+GET http://h384fj23045v.aivon.top/quotes_service/api/json_v2.php/Market_Center.getHQNodeDataSimple?page=1&num=40&sort=symbol&asc=1&node=dpzs&_s_r_a=init
